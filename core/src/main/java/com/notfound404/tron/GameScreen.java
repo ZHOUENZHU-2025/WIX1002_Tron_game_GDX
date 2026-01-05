@@ -2,12 +2,13 @@ package com.notfound404.tron;
 
 import com.badlogic.gdx.Screen;
 
-/** First screen of the application. Displayed after the application is created. */
-public class FirstScreen implements Screen {
+
+/** Game screen where the main gameplay occurs. */
+public class GameScreen implements Screen {
 
     public final Main game;
 
-    FirstScreen(Main game) {
+    GameScreen(Main game) {
         this.game = game;
     }
 
