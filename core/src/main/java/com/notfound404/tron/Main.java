@@ -3,6 +3,7 @@ package com.notfound404.tron;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
@@ -12,12 +13,14 @@ public class Main extends Game {
     public FitViewport viewport;
     public ShapeRenderer shapeRenderer;
     public BitmapFont font;
+    public SpriteBatch batch;
 
     @Override
     public void create() {
         viewport = new FitViewport(16, 9);
         shapeRenderer = new ShapeRenderer();
         font = new BitmapFont();
+        batch = new SpriteBatch();
 
         font.setUseIntegerPositions(false);
         font.getData().setScale(viewport.getWorldHeight()/Gdx.graphics.getHeight());
@@ -34,6 +37,7 @@ public class Main extends Game {
     @Override
     public void dispose() {
         shapeRenderer.dispose();
+        batch.dispose();
         font.dispose();
     }
 
