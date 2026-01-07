@@ -1,7 +1,7 @@
 package com.notfound404.arena;
 
 import java.util.ArrayList;
-import com.notfound404.character.Bike;
+import com.notfound404.character.*;
 
 public class GameArena {
     
@@ -9,6 +9,10 @@ public class GameArena {
     //竞技场的单元格
     private final static int ARENA_WIDTH = 40;
     private final static int ARENA_HEIGHT = 40;
+    //Border: Wall 4 / Cliff -1 (As the following) 
+    //边界：围墙/空(用4/-1，如下)
+    private final static int BORDER_WIDTH = 2;
+    private final static int ARENA_SIZE = 44;
 
     //The size of each cell in pixels
     //像素尺寸
@@ -37,26 +41,28 @@ public class GameArena {
         RIGHT
     }
 
-    ArrayList<Bike> bikes;
-    ArrayList<Explosion> explosions;
+    private ArrayList<Bike> bikes;
+    private ArrayList<Explosion> explosions;
+    private ArrayList<Disco> discos;
 
 
     public GameArena() {
-        grid = new int[ARENA_WIDTH][ARENA_HEIGHT];
+        grid = new int[ARENA_WIDTH + 2*BORDER_WIDTH][ARENA_HEIGHT + + 2*BORDER_WIDTH];
         bikes = new ArrayList<Bike>();
         explosions = new ArrayList<Explosion>();
+        discos = new ArrayList<Disco>();
     }
 
 
     public int getCellValue(int x, int y) {
-        if (x < 0 || x >= ARENA_WIDTH || y < 0 || y >= ARENA_HEIGHT) {
+        if (x < 0 || x >= ARENA_SIZE || y < 0 || y >= ARENA_SIZE) {
             return -1; // Out of bounds
         }
         return grid[x][y];
     }
 
     public void setCellValue(int x, int y, int value) {
-        if (x < 0 || x >= ARENA_WIDTH || y < 0 || y >= ARENA_HEIGHT) {
+        if (x < 0 || x >= ARENA_SIZE || y < 0 || y >= ARENA_SIZE) {
             return; // Out of bounds
         }
         grid[x][y] = value;
@@ -68,5 +74,9 @@ public class GameArena {
 
     public void addExplosion(int x, int y) {
         explosions.add(new Explosion(x, y));
+    }
+
+    public void addDisco(Disco disco){
+        discos.add(disco);
     }
 }

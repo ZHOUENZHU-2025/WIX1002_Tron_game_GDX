@@ -13,17 +13,14 @@ public class Player extends Bike {
     private PlayerLevelSystem levelSystem; // 玩家的升级系统
 
 
-    public Player(String playerType, String playerID, int startX, int startY, Color color, GameArena arena) {
-        super(arena, startX, startY, color);
+    //The constructor should later be modified as IO
+    //这里之后改成文件读取
+    public Player(String playerType, String playerID, int startX, int startY, GameArena arena) {
+        super(arena, startX, startY, 2, Color.CYAN);
         this.playerType = playerType;
         this.playerID = playerID;
-        this.x = startX;
-        this.y = startY;
-        this.arena = arena;
         this.exp = 0;
-        this.isAlive = true;
-        this.hasAccelerator = false;
-        this.isIneffective = false;
+        //The slot will be decided by the input file
         this.discoSlots = this.discoMAX =  3;
 
         this.dir = GameArena.Direction.UP;
@@ -44,18 +41,18 @@ public class Player extends Bike {
                 case "tron":
                     // Tron: 平衡型角色
                     this.lp = this.maxLP = 120;
-                    this.speed = 1.2;
+                    this.speed = 12;
                     break;
                 case "kevin":
                 case "kelvin": // 容错处理
                     // Kevin: 高速度型角色
                     this.lp = this.maxLP = 100;
-                    this.speed = 1.5;
+                    this.speed = 15;
                     break;
                 default:
                     // 默认值
                     this.lp = this.maxLP = 110;
-                    this.speed = 1.3;
+                    this.speed = 13;
             }
         }
     }

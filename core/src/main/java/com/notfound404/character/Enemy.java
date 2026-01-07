@@ -4,6 +4,7 @@ import com.notfound404.levelsystem.EnemyLevelSystem;
 
 import com.notfound404.arena.GameArena;
 import com.badlogic.gdx.graphics.Color;
+import com.notfound404.levelsystem.*;
 
 public class Enemy extends Bike {
     public static int enemyCount = 0;
@@ -11,7 +12,7 @@ public class Enemy extends Bike {
     private int difficulty; // 敌人难度级别
 
     public Enemy(GameArena arena, int x, int y, Color color, int difficulty) {
-        super(arena, x, y, color);
+        super(arena, x, y, 2, color);
         this.difficulty = difficulty;
         this.levelSystem = new EnemyLevelSystem(difficulty);
         

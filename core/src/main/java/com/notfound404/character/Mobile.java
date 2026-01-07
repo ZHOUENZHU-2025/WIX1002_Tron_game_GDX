@@ -40,10 +40,10 @@ public abstract class Mobile {
     //用于处理“float”移动与“int”网格冲突的累加器
     protected float accumulator;
 
-    Mobile(int x, int y, int speed, int idNum){
+    Mobile(int x, int y, int idNum){
         this.x = x;
         this.y = y;
-        this.speed = speed;
+        speed = 0;
         this.idNum = idNum;
         isActive = true;
         accumulator = 0f;
@@ -60,6 +60,10 @@ public abstract class Mobile {
 
     //Move one step and update self state
     abstract protected void moveOneStep();
+
+    protected void markSelf(){
+        arena.setCellValue(x, y, idNum);
+    }
 
     public boolean isActive(){return isActive;}
 
