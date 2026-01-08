@@ -1,121 +1,100 @@
-// 用途：玩家专用升级系统，包含技能选择功能，每2级提供技能选择选项
 package com.notfound404.levelsystem;
 
 import com.notfound404.character.Enemy;
+import com.notfound404.character.Player;
 
 /**
- * 玩家专用升级系统 - 包含技能选择
+ * 玩家专用升级系统 - 扩展了技能选择功能（每2级一次）
  */
 public class PlayerLevelSystem extends BaseLevelSystem {
     
-    // 技能选择记录
-    private int bounceCount = 0;        // 飞盘反弹次数
-    private int maxDiscs = 1;           // 最大飞盘数量
-    private int projectileCount = 1;    // 弹道数量
-    private int discsPerShot = 1;       // 每次攻击消耗飞盘数
+    // 玩家特有的技能统计
+    private int bounceCount = 0;      // 飞盘反弹次数
+    private int maxDiscs = 3;         // 最大持有飞盘数
+    private int projectileCount = 1;  // 同时发射的弹道数
+    private int discsPerShot = 1;     // 每次发射消耗的飞盘
     
+    private Player player; // 持有玩家引用，用于修改属性
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
+
     /**
-     * 升级逻辑 - 玩家版
+     * 玩家升级逻辑
      */
     @Override
     protected void levelUp() {
         currentLevel++;
+        currentXP = currentXP - currentXPCap; // 扣除消耗掉的经验，保留溢出的部分
+        currentXPCap *= XP_CAP_MULTIPLIER;   // 提高下一级的难度
         
-        // 重置当前经验（保留溢出部分）
-        currentXP = currentXP - currentXPCap;
-        
-        // 提升经验上限
-        currentXPCap *= XP_CAP_MULTIPLIER;
-        
-        // 应用基础属性提升（生命值、速度都×1.1）
+        // 1. 调用通用的基础属性提升
         applyBaseStatUpgrade();
         
-        // 玩家：每2级提供技能选择（从第2级开始）
+        // 2. 玩家特有逻辑：每2级获得一次技能强化机会
         if (currentLevel >= 2 && currentLevel % 2 == 0) {
             presentSkillChoice();
         }
-        
-        // 触发升级事件
-        onLevelUp();
     }
     
     /**
-     * 基础属性提升：生命值和速度都乘以1.1
+     * 直接修改Player实体类中的属性字段
      */
     @Override
     protected void applyBaseStatUpgrade() {
-        // 这些方法需要在Bike类中实现
-        // 生命值 × 1.1
-        // 速度 × 1.1
-    
+        if (player != null) {
+            // 生命值同步：基础属性提高1.1倍，并补满当前血量
+            player.maxLP = (int)(player.maxLP * STAT_MULTIPLIER);
+            player.lp = player.maxLP; 
+            
+            // 速度同步：提高1.1倍
+            player.speed = player.speed * STAT_MULTIPLIER;
+            
+            // 将等级和经验同步回Player类中的变量，方便UI读取
+            player.level = currentLevel;
+            player.exp = (int)currentXP;
+        }
     }
     
     /**
-     * 显示技能选择界面 - 玩家专用
+     * 技能选择界面入口（由UI系统重写或对接）目前预留在player里的ui对接
      */
     public void presentSkillChoice() {
-        //这里需要对接ui，选择升级
-
-        // 实际游戏中应该暂停游戏，显示UI让玩家选择
-        // 选择逻辑需要在UI中实现
+        // 此处应触发UI显示，暂停游戏等
+        //也许未来的逻辑是把player里的这个选择检查以及一些系列的ui跳转挪到这里来，再来对接ui
     }
     
     /**
-     * 应用技能选择 - 由UI调用
-     * @param choice 选择编号 (1, 2, 3)
+     * 玩家做出选择后的逻辑处理
+     * @param choice 1:增加反弹, 2:增加上限, 3:增加弹道
      */
     public void makeSkillChoice(int choice) {
         switch (choice) {
-            case 1:
-                bounceCount++;
-                //飞盘反弹次数加一
-                break;
-            case 2:
-                maxDiscs++;
-                //ui2 增加飞盘上限
-                break;
-            case 3:
+            case 1: bounceCount++; break;
+            case 2: maxDiscs++; break;
+            case 3: 
                 projectileCount++;
-                discsPerShot = projectileCount; // 消耗与弹道数相同
-                //ui3 增加弹道
+                discsPerShot = projectileCount; // 弹道越多，单次消耗越多
                 break;
-            default:
-                //若无效默认1
-                makeSkillChoice(1);
+            default: makeSkillChoice(1); // 默认选1
         }
     }
-    
+
     /**
-     * 击败敌人增加经验（增强版）
-     * @param enemy 被击败的敌人
+     * 根据敌人难度和等级获取经验值
      */
     public void addXPFromEnemy(Enemy enemy) {
-        int xpGained = enemy.getXPForDefeating();
-        currentXP += xpGained;
-        
-        while (currentXP >= currentXPCap) {
-            levelUp();
-        }
+        addXP(enemy.getXPForDefeating());
     }
     
-    /**
-     * 是否可以发射飞盘
-     */
-    public boolean canShootDisc(int currentDiscs) {
-        return currentDiscs >= discsPerShot;
-    }
-    
-    /**
-     * 消耗飞盘（发射时）
-     */
-    public int consumeDiscsForShot() {
-        return discsPerShot;
-    }
-    
-    // Getters
+    // --- 飞盘射击逻辑判断接口 ---
+    public boolean canShootDisc(int currentDiscs) { return currentDiscs >= discsPerShot; }
+    public int consumeDiscsForShot() { return discsPerShot; }
+
+    // --- Getter 供 Player 实体调用 ---
     public int getBounceCount() { return bounceCount; }
     public int getMaxDiscs() { return maxDiscs; }
     public int getProjectileCount() { return projectileCount; }
     public int getDiscsPerShot() { return discsPerShot; }
-
 }

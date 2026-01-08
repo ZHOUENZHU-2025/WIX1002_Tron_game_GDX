@@ -1,48 +1,44 @@
 package com.notfound404.character;
 
-import com.notfound404.levelsystem.EnemyLevelSystem;
-
 import com.notfound404.arena.GameArena;
 import com.badlogic.gdx.graphics.Color;
-import com.notfound404.levelsystem.*;
+import com.notfound404.levelsystem.EnemyLevelSystem;
+import com.notfound404.levelsystem.BaseLevelSystem;
 
 public class Enemy extends Bike {
     public static int enemyCount = 0;
+    
     private EnemyLevelSystem levelSystem; // 敌人的升级系统
     private int difficulty; // 敌人难度级别
 
     public Enemy(GameArena arena, int x, int y, Color color, int difficulty) {
         super(arena, x, y, 2, color);
         this.difficulty = difficulty;
+
         this.levelSystem = new EnemyLevelSystem(difficulty);
-        
-        initializeStatsByLevel();
+        this.levelSystem.setEnemy(this);
+        syncStatsToLevel();
 
         enemyCount++;
     }
 
 
-private void initializeStatsByLevel() {
+    private void syncStatsToLevel() {
         int level = levelSystem.getCurrentLevel();
+        double multiplier = Math.pow(BaseLevelSystem.getStatMultiplier(), level - 1);
         
-        // 生命值 = 基础值 × (1.1^(等级-1))
-        this.maxHealth = (int)(100 * Math.pow(BaseLevelSystem.getStatMultiplier(), level - 1));
-        this.currentHealth = maxHealth;
-        
-        // 速度 = 基础值 × (1.1^(等级-1))
-        this.speed = 1.0 * Math.pow(BaseLevelSystem.getStatMultiplier(), level - 1);
+        // 初始基础值（例如生命10，速度1.0）乘以倍数
+        this.maxLP = (int)(10 * multiplier);
+        this.lp = maxLP;
+        this.speed = 1.0 * multiplier;
     }
     
     @Override
-    public void onMove(int cellsMoved) {
-        super.onMove(cellsMoved);
-        // 敌人移动也可以获得经验，和玩家一样
-        levelSystem.addXPFromMovement(cellsMoved);
-    }
-    
-    // 获取升级系统
-    public EnemyLevelSystem getLevelSystem() {
-        return levelSystem;
+    protected void moveOneStep() {
+        super.moveOneStep(); // 先执行父类的移动逻辑
+        
+       // 敌人移动也可以获得经验，和玩家一样
+        levelSystem.addXPFromMovement(1);
     }
     
     /**
@@ -51,12 +47,11 @@ private void initializeStatsByLevel() {
      */
     public int getXPForDefeating() {
         int level = levelSystem.getCurrentLevel();
-        
         // 基础经验 = 10 × 等级
         int baseXP = 10 * level;
-        
         // 难度加成
         int difficultyBonus = 0;
+        
         switch (difficulty) {
             case 1: // 简单
                 difficultyBonus = level * 5;
@@ -81,6 +76,7 @@ private void initializeStatsByLevel() {
         
         return totalXP;
     }
+
     /**
      * 获取敌人等级
      */
@@ -94,4 +90,10 @@ private void initializeStatsByLevel() {
     public int getDifficulty() {
         return difficulty;
     }
+
+    // 获取升级系统
+    public EnemyLevelSystem getLevelSystem() {
+        return levelSystem;
+    }
+
 }
