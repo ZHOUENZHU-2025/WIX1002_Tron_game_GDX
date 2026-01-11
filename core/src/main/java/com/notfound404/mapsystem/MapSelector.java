@@ -1,7 +1,6 @@
 package com.notfound404.mapsystem;
 
 import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,27 +20,30 @@ public class MapSelector {
      */
     public List<String> getAvailableMapNames() {
         List<String> mapNames = new ArrayList<>();
-        
         // 先加入随机地图选项，方便 UI 显示
         mapNames.add(RANDOM_MAP_KEY);
 
-        try {
-            URL url = getClass().getResource("/com/notfound404/map/");
-            if (url != null) {
-                File folder = new File(url.toURI());
-                File[] listOfFiles = folder.listFiles();
+        // 获取 assets 目录
+        File folder = new File("assets/map/");
 
-                if (listOfFiles != null) {
-                    for (File file : listOfFiles) {
-                        // 过滤出所有 .txt 文件，排除随机模式标识本身
-                        if (file.isFile() && file.getName().endsWith(".txt")) {
-                            mapNames.add(file.getName());
-                        }
+        if (!folder.exists() || !folder.isDirectory()) {
+            // 尝试直接通过全名探测（根据你提供的路径结构）
+            folder = new File("WIX1002_Tron_game_GDX-main/assets/map/");
+        }
+
+        if (folder.exists() && folder.isDirectory()) {
+            File[] listOfFiles = folder.listFiles();
+            if (listOfFiles != null) {
+                for (File file : listOfFiles) {
+                    // 过滤出所有 .txt 文件，排除随机模式标识本身
+                    if (file.isFile() && file.getName().endsWith(".txt")) {
+                        mapNames.add(file.getName());
                     }
                 }
             }
-        } catch (Exception e) {
-            System.err.println("MapSelector: 自动扫描文件失败: " + e.getMessage());
+        } else {
+            // 调试用：如果还是找不到，打印当前程序到底在哪个目录下运行
+            System.err.println("MapSelector: 找不到地图目录。程序运行在: " + System.getProperty("user.dir"));
         }
         return mapNames;
     }

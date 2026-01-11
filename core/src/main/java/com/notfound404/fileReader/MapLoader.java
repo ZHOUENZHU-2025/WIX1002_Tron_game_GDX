@@ -8,6 +8,10 @@ import java.io.InputStreamReader;
 import com.notfound404.mapsystem.MapSelector;
 import com.notfound404.mapsystem.RandomMapGenerator;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+
 /**
  * 地图加载器 - 负责执行最终的地图写入动作
  */
@@ -47,37 +51,29 @@ public class MapLoader {
      * 逻辑 B: 原有的文件读取逻辑
      */
     private void loadMapFromFile(GameArena arena, String mapName) {
-        String path = "/com/notfound404/map/" + mapName;
+        // 1. 尝试直接读取
+        File mapFile = new File("assets/map/" + mapName);
         
-        try (InputStream is = getClass().getResourceAsStream(path);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+        // 2. 如果不存在，尝试加上项目前缀读取
+        if (!mapFile.exists()) {
+            mapFile = new File("WIX1002_Tron_game_GDX-main/assets/map/" + mapName);
+        }
 
-            if (is == null) {
-                System.err.println("错误: 找不到地图文件 " + path);
-                return;
-            }
+        try (FileInputStream fis = new FileInputStream(mapFile);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(fis))) {
 
             String line;
             int row = 0;
             while ((line = reader.readLine()) != null && row < 44) {
-                // 兼容空格或逗号分隔符
                 String[] values = line.trim().split("[,\\s]+");
-                
                 for (int col = 0; col < values.length && col < 44; col++) {
-                    try {
-                        int cellValue = Integer.parseInt(values[col]);
-                        arena.setCellValue(col, row, cellValue);
-                    } catch (NumberFormatException e) {
-                        arena.setCellValue(col, row, 0); // 异常数据默认为空地
-                    }
+                    arena.setCellValue(col, row, Integer.parseInt(values[col]));
                 }
                 row++;
             }
-            //System.out.println("MapLoader: 成功从文件加载地图: " + mapName);
-
+            //System.out.println("MapLoader: 成功从 " + mapFile.getPath() + " 加载地图");
         } catch (Exception e) {
-            System.err.println("MapLoader: 读取文件异常: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("MapLoader 错误: 无法找到文件 " + mapFile.getAbsolutePath());
         }
     }
 }
