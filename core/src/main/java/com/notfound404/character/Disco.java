@@ -61,7 +61,11 @@ class Disco extends Mobile {
             return;
         }
         //The disco cross something, then it must be empty.(The bike will move away leaving it empty)
-        arena.setCellValue(x, y, 0);
+        int currentVal = arena.getCellValue(x, y);
+        if(currentVal == 5 || currentVal == 6) {
+            arena.setCellValue(x, y, 0);
+        }
+
         accumulatorX+=kx;
         accumulatorY+=ky;
         if(accumulatorX>=1){
@@ -131,7 +135,13 @@ class Disco extends Mobile {
         //Never draw again, the position on the map becomes empty.
         isActive = false;
         idNum = 0;
-        markSelf();
+
+        //Mark itself if disco is the only thing on the ground
+        int currentVal = arena.getCellValue(x, y);
+        if(currentVal == 5 || currentVal == 6) {
+            markSelf();
+        }
+        
     }
 
     @Override

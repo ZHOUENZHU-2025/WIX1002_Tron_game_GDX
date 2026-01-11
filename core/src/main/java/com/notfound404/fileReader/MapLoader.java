@@ -50,11 +50,11 @@ public class MapLoader {
      */
     private void loadMapFromFile(GameArena arena, String mapName) {
         // 1. 尝试直接读取
-        File mapFile = new File("assets/map/" + mapName);
+        File mapFile = new File("map/" + mapName);
         
         // 2. 如果不存在，尝试加上项目前缀读取
         if (!mapFile.exists()) {
-            mapFile = new File("WIX1002_Tron_game_GDX-main/assets/map/" + mapName);
+            mapFile = new File("map/" + mapName);
         }
 
         try (FileInputStream fis = new FileInputStream(mapFile);

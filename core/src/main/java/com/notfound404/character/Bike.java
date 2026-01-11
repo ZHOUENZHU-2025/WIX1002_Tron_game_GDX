@@ -45,11 +45,11 @@ public abstract class Bike extends Mobile{
         this.arena = arena;
         this.color = color;
         this.dir = GameArena.Direction.UP;
-        this.trailLength = 45;
+        this.trailLength = 50;
         this.hasAccelerator = false;
         this.isIneffective = false;
         this.discoSlots = this.discoMAX = 3;
-        this.discoRange = 24;
+        this.discoRange = 30;
         this.bikeTrail = new Trail(this);
         arena.addTrail(bikeTrail);
         markSelf();
