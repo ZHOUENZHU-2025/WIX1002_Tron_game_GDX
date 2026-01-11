@@ -10,7 +10,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
 
-public class MenuScreen implements Screen {
+public class GameScreen implements Screen {
     
     private final Main game;
     private final String[] menuItems = {
