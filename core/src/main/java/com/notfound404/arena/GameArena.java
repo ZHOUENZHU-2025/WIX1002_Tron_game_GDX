@@ -116,6 +116,14 @@ public class GameArena {
     }
 
     public void addExplosion(int x, int y) {
+        for(int i = x-1; i <= x + 1 ;i++){
+            for(int j = y - 1; j <= y + 1; j++){
+                if(grid[x][y] == 1){
+                    grid[x][y] = 0;
+                }
+            }
+        }
+            
         explosions.add(new Explosion(x, y));
     }
 
@@ -135,8 +143,7 @@ public class GameArena {
 
     //Input where to shoot the disco
     //输入射击命令
-    public void inputShoot(int tX, int tY, float deltaTime){
-        shootTimer-=deltaTime;
+    public void inputShoot(int tX, int tY){
         if(shootTimer<=0){
             playerBike.shootDisco(tX, tY);
             shootTimer = SHOOTSPAN;
@@ -145,6 +152,9 @@ public class GameArena {
 
     public void update(float deltaTime){
 
+        if(shootTimer>0){
+            shootTimer-=deltaTime;
+        }
         if(playerBike.isDisposed()){
             //Call GameOver function
             isGameOver = true;

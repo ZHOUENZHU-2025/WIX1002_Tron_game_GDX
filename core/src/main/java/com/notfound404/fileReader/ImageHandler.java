@@ -29,7 +29,7 @@ public class ImageHandler {
      * 
      * 墙体较多，不存在矩阵中
      * 目前仅以纯白色格点表示
-     * 如果需要一定的图形，要存在Sprite图中（要么一开始就有png，要么用 shaperenderer 根据矩阵画一张静态图储存成sprite）
+     * 如果需要一定的图形，要存在Sprite图中（要么一开始就有png，要么用 `shaperenderer` 根据矩阵画一张静态图储存成sprite）
      * 轨道单元同理
      */
 

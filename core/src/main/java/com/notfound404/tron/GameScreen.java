@@ -75,7 +75,7 @@ public class GameScreen implements Screen {
             int gridY = (int) (arenaY / 8);   // CELL_SIZE
 
             if (gridX >= 0 && gridX < 44 && gridY >= 0 && gridY < 44) {
-                arena.inputShoot(gridX, gridY, delta);
+                arena.inputShoot(gridX, gridY);
             }
         }
 

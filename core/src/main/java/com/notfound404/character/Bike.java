@@ -49,7 +49,7 @@ public abstract class Bike extends Mobile{
         this.hasAccelerator = false;
         this.isIneffective = false;
         this.discoSlots = this.discoMAX = 3;
-        this.discoRange = 5;
+        this.discoRange = 10;
         this.bikeTrail = new Trail(this);
         arena.addTrail(bikeTrail);
         markSelf();
@@ -70,10 +70,10 @@ public abstract class Bike extends Mobile{
             case DOWN:
                 return dir_in == Direction.UP;
             case LEFT:
-                return dir_in == Direction.LEFT;
-            case RIGHT:
-                default:
                 return dir_in == Direction.RIGHT;
+            case RIGHT:
+            default:
+                return dir_in == Direction.LEFT;
         }
     }
 

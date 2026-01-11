@@ -31,7 +31,7 @@ public class Explosion {
     }
 
     class Particle{
-        private int x, y;
+        private float x, y;
         Color color;
         float lifeTime;
         float maxLifeTime;
@@ -43,10 +43,10 @@ public class Explosion {
             this.x = 0;
             this.y = 0;
             this.color = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1);
-            this.maxLifeTime = MathUtils.random(1f, 2f);
+            this.maxLifeTime = MathUtils.random(0.8f, 1.5f);
             this.lifeTime = maxLifeTime;
             float angle = MathUtils.random(0, 2 * MathUtils.PI);
-            float speed = MathUtils.random(10, 20);
+            float speed = MathUtils.random(20, 50);
             this.velX = MathUtils.cos(angle) * speed;
             this.velY = MathUtils.sin(angle) * speed;
             this.accumulatorX = 0;
@@ -60,17 +60,17 @@ public class Explosion {
             accumulatorX += velX * deltaTime;
             accumulatorY += velY * deltaTime;
 
-            x += (int)accumulatorX;
-            y += (int)accumulatorY;
+            x += accumulatorX;
+            y += accumulatorY;
 
-            accumulatorX -= (int)accumulatorX;
-            accumulatorY -= (int)accumulatorY;
+            accumulatorX -= accumulatorX;
+            accumulatorY -= accumulatorY;
 
             return lifeTime >0;
         }
 
-        public int getX(){return x;}
-        public int getY(){return y;}
+        public float getX(){return x;}
+        public float getY(){return y;}
     }
 
     public void draw(ShapeRenderer painter){

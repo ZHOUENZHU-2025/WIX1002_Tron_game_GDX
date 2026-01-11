@@ -88,8 +88,11 @@ public class Trail {
         for(TrailUnit unit : trailUnits){
             int x = unit.getX();
             int y = unit.getY();
-            painter.setColor(color);
-            painter.rect(x*GameArena.CELL_SIZE+64, y*GameArena.CELL_SIZE+4, GameArena.CELL_SIZE, GameArena.CELL_SIZE);
+            if(arena.getCellValue(x, y)==1){
+                painter.setColor(color);
+                painter.rect(x*GameArena.CELL_SIZE+64, y*GameArena.CELL_SIZE+4, GameArena.CELL_SIZE, GameArena.CELL_SIZE);
+            }
+            
         }
     }
 }
