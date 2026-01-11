@@ -6,8 +6,7 @@ import com.notfound404.arena.GameArena;
 import com.notfound404.character.Bike;
 import com.notfound404.character.Disco;
 import com.notfound404.arena.GameArena.Direction;
-
-import java.io.*;
+import java.io.FileInputStream;
 import java.util.Scanner;
 
 public class ImageHandler {
@@ -47,23 +46,51 @@ public class ImageHandler {
     }
 
     private static int[][] bikeShapeReader(String fin){
-        int[][] bikeShape = new int[8][8];
-        String path = "image/" + fin;
+        int[][] shape = new int[8][8];
+        String path = "image/" + fin; // 确保你的assets文件夹下真的有 image 文件夹
 
-        try(Scanner scanner = new Scanner(new FileInputStream(path))){
+        try {
+            // 使用 LibGDX 的文件句柄，它会自动指向 assets 目录
+            String content = com.badlogic.gdx.Gdx.files.internal(path).readString();
+            Scanner scanner = new Scanner(content);
+            
             for (int row = 0; row < 8; row++) {
                 for (int col = 0; col < 8; col++) {
                     if (scanner.hasNextInt()) {
-                        bikeShape[row][col] = scanner.nextInt();
+                        shape[row][col] = scanner.nextInt();
                     }
+                }
             }
-        }
-        }catch (Exception e) {
+            scanner.close();
+        } catch (Exception e) {
+            // 如果读取失败，打印错误，并生成一个默认的 8x8 方块，保证你能看到车
+            System.err.println("错误：无法读取模型文件 " + path + "，使用默认方块代替。");
             e.printStackTrace();
+            for(int i=0; i<8; i++) 
+                for(int j=0; j<8; j++) 
+                    shape[i][j] = 1; // 填充为1，确保能画出来
         }
-
-        return bikeShape;
+        return shape;
     }
+
+    // private static int[][] bikeShapeReader(String fin){
+    //     int[][] bikeShape = new int[8][8];
+    //     String path = "image/" + fin;
+
+    //     try(Scanner scanner = new Scanner(new /**/(path))){
+    //         for (int row = 0; row < 8; row++) {
+    //             for (int col = 0; col < 8; col++) {
+    //                 if (scanner.hasNextInt()) {
+    //                     bikeShape[row][col] = scanner.nextInt();
+    //                 }
+    //         }
+    //     }
+    //     }catch (Exception e) {
+    //         e.printStackTrace();
+    //     }
+
+    //     return bikeShape;
+    // }
 
     private static int[][] discoShapeReader(String fin){
         int[][] discoShape = new int[8][8];

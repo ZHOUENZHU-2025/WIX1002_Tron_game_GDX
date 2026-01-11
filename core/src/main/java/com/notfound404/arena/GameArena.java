@@ -1,6 +1,7 @@
 package com.notfound404.arena;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -157,21 +158,34 @@ public class GameArena {
         */
             
         //Check the state. Then Update the state. Leave disposal to the next time
-        for(Disco disco:discos){
-            if(disco.isDisposed())
-                discos.remove(disco);
-            disco.update(deltaTime);
+        Iterator<Disco> discoIt = discos.iterator();
+        while (discoIt.hasNext()) {
+            Disco disco = discoIt.next();
+            if (disco.isDisposed()) {
+                discoIt.remove();
+            } else {
+                disco.update(deltaTime);
+            }
         }
-        for(Bike bike : bikes){
-            if(bike.isDisposed()){
-                bikes.remove(bike);
-            }    
-            bike.update(deltaTime);
-            
+
+        // 2. 安全地更新和移除 Bike
+        Iterator<Bike> bikeIt = bikes.iterator();
+        while (bikeIt.hasNext()) {
+            Bike bike = bikeIt.next();
+            if (bike.isDisposed()) {
+                bikeIt.remove();
+            } else {
+                bike.update(deltaTime);
+            }
         }
-        for(Explosion epl: explosions){
-            if(epl.update(deltaTime))
-                explosions.remove(epl);
+
+        // 3. 安全地更新和移除 Explosion
+        Iterator<Explosion> expIt = explosions.iterator();
+        while (expIt.hasNext()) {
+            Explosion epl = expIt.next();
+            if (epl.update(deltaTime)) { // update 返回 true 表示播放完毕
+                expIt.remove();
+            }
         }
     }
 
