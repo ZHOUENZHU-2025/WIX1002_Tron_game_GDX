@@ -74,8 +74,8 @@ public class Explosion {
     }
 
     public void draw(ShapeRenderer painter){
-        int baseX = centerX * 8 + 64;
-        int baseY = centerY * 8 + 4;
+        int baseX = centerX * 9;
+        int baseY = centerY * 9;
         for(Particle particle:particles){
             painter.setColor(particle.color);
             painter.rect(baseX + particle.getX(), baseY + particle.getY(), 2, 2);

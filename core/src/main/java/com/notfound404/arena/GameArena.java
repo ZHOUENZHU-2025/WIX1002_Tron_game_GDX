@@ -21,7 +21,7 @@ public class GameArena {
 
     //The size of each cell in pixels
     //像素尺寸
-    public final static int CELL_SIZE = 8;
+    public final static int CELL_SIZE = 9;
 
     /*The grid representing the arena
     * Each cell can have the following values:

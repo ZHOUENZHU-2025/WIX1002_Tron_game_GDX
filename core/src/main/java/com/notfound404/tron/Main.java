@@ -17,7 +17,7 @@ public class Main extends Game {
 
     @Override
     public void create() {
-        viewport = new FitViewport(480, 360);
+        viewport = new FitViewport(528, 396);
         shapeRenderer = new ShapeRenderer();
         font = new BitmapFont();
         batch = new SpriteBatch();

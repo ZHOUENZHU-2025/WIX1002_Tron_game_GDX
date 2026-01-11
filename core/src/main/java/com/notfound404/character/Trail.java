@@ -90,7 +90,7 @@ public class Trail {
             int y = unit.getY();
             if(arena.getCellValue(x, y)==1){
                 painter.setColor(color);
-                painter.rect(x*GameArena.CELL_SIZE+64, y*GameArena.CELL_SIZE+4, GameArena.CELL_SIZE, GameArena.CELL_SIZE);
+                painter.rect(x*GameArena.CELL_SIZE, y*GameArena.CELL_SIZE, GameArena.CELL_SIZE, GameArena.CELL_SIZE);
             }
             
         }

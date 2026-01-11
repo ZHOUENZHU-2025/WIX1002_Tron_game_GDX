@@ -10,12 +10,7 @@ import java.util.Scanner;
 
 public class ImageHandler {
 
-    private final static int CELL_SIZE = 8;//Pixels width/height for a grid
-
-    //Some offset because the unmatched size of Viewport and Arena
-    //Add it when mapping Arena co-ordinates to Viewport pixel co-ordinate
-    private final static int OFFSET_X = 64;
-    private final static int OFFSET_Y = 4;
+    private final static int CELL_SIZE = 9;//Pixels width/height for a grid
     
     //Patter for bike and disco
     //0 for background, 1 for white pixels, 2 for self color 
@@ -39,13 +34,12 @@ public class ImageHandler {
     public ImageHandler(GameArena arena, ShapeRenderer shapeRdr){
         this.arena = arena;
         this.shaper = shapeRdr;
-        //正式版这里读文件，现在用手动的矩阵取代
         bikeShape = bikeShapeReader("bike.txt");
         discoShape = discoShapeReader("disco.txt");
     }
 
     private static int[][] bikeShapeReader(String fin){
-        int[][] shape = new int[8][8];
+        int[][] shape = new int[9][9];
         String path = "image/" + fin; 
         Scanner scanner = null;
         try {
@@ -54,19 +48,19 @@ public class ImageHandler {
             content = content.replace(",", " ");
             scanner = new Scanner(content);
             
-            for (int row = 0; row < 8; row++) {
-                for (int col = 0; col < 8; col++) {
+            for (int row = 0; row < 9; row++) {
+                for (int col = 0; col < 9; col++) {
                     if (scanner.hasNextInt()) {
                         shape[row][col] = scanner.nextInt();
                     }
                 }
             }
         } catch (Exception e) {
-            // 如果读取失败，打印错误，并生成一个默认的 8x8 方块，保证你能看到车
+            // 如果读取失败，打印错误，并生成一个默认的 9x9 方块，保证你能看到车
             System.err.println("错误：无法读取模型文件 " + path + "，使用默认方块代替。");
             e.printStackTrace();
-            for(int i=0; i<8; i++) 
-                for(int j=0; j<8; j++) 
+            for(int i=0; i<9; i++) 
+                for(int j=0; j<9; j++) 
                     shape[i][j] = 1; // 填充为1，确保能画出来
         } finally{
             if(scanner!=null)
@@ -76,26 +70,26 @@ public class ImageHandler {
     }
 
     private static int[][] discoShapeReader(String fin){
-        int[][] discoShape = new int[8][8];
+        int[][] discoShape = new int[9][9];
         String path = "image/" + fin;
         Scanner scanner = null;
         try{
             String content = com.badlogic.gdx.Gdx.files.internal(path).readString();
             content = content.replace(",", " ");
             scanner = new Scanner(content);
-            for (int row = 0; row < 8; row++) {
-                for (int col = 0; col < 8; col++) {
+            for (int row = 0; row < 9; row++) {
+                for (int col = 0; col < 9; col++) {
                     if (scanner.hasNextInt()) {
                         discoShape[row][col] = scanner.nextInt();
                     }
                 }
             }
         }catch (Exception e) {
-            // 如果读取失败，打印错误，并生成一个默认的 8x8 方块，保证你能看到
+            // 如果读取失败，打印错误，并生成一个默认的 9x9 方块，保证你能看到
             System.err.println("错误：无法读取模型文件 " + path + "，使用默认方块代替。");
             e.printStackTrace();
-            for(int i=0; i<8; i++) 
-                for(int j=0; j<8; j++) 
+            for(int i=0; i<9; i++) 
+                for(int j=0; j<9; j++) 
                     discoShape[i][j] = 1; // 填充为1，确保能画出来
         }finally{
             if(scanner!=null)
@@ -112,25 +106,23 @@ public class ImageHandler {
         Color color = bike.getColor();
         Direction dir = bike.gDirection();
         baseX *=CELL_SIZE;
-        baseX +=64;
         baseY *=CELL_SIZE;
-        baseY +=4;
-        for (int r = 0; r < 8; r++) {       // rows
-            for (int c = 0; c < 8; c++) {   // columns
+        for (int r = 0; r < 9; r++) {       // rows
+            for (int c = 0; c < 9; c++) {   // columns
                 int row = 0;
                 int col = 0;
                 switch(dir){
                     case UP:
-                        row = 7-c;
+                        row = 8-c;
                         col = r;
                         break;
                     case DOWN:
                         row = c;
-                        col = 7-r;
+                        col = 8-r;
                         break;
                     case LEFT:
-                        row = 7-r;
-                        col = 7-c;
+                        row = 8-r;
+                        col = 8-c;
                         break;
                     case RIGHT:
                     default:
@@ -158,11 +150,9 @@ public class ImageHandler {
 
         Color color = disco.getColor();
         baseX *=CELL_SIZE;
-        baseX +=64;
         baseY *=CELL_SIZE;
-        baseY +=4;
-        for (int r = 0; r < 8; r++) {       // rows
-            for (int c = 0; c < 8; c++) {   // columns
+        for (int r = 0; r < 9; r++) {       // rows
+            for (int c = 0; c < 9; c++) {   // columns
                 int pixelColor = discoShape[r][c];
                 if(pixelColor == 0) continue;
                 shaper.setColor(pixelColor == 1 ? Color.WHITE : color);
@@ -182,8 +172,8 @@ public class ImageHandler {
     public void drawWall(int x, int y){
         shaper.setColor(Color.WHITE);
         
-        float screenX = x * CELL_SIZE + OFFSET_X;
-        float screenY = y * CELL_SIZE + OFFSET_Y;
+        float screenX = x * CELL_SIZE;
+        float screenY = y * CELL_SIZE;
         
         shaper.rect(screenX, screenY, CELL_SIZE, CELL_SIZE);
     }
