@@ -47,12 +47,13 @@ public class ImageHandler {
 
     private static int[][] bikeShapeReader(String fin){
         int[][] shape = new int[8][8];
-        String path = "image/" + fin; // 确保你的assets文件夹下真的有 image 文件夹
-
+        String path = "image/" + fin; 
+        Scanner scanner = null;
         try {
-            // 使用 LibGDX 的文件句柄，它会自动指向 assets 目录
+            
             String content = com.badlogic.gdx.Gdx.files.internal(path).readString();
-            Scanner scanner = new Scanner(content);
+            content = content.replace(",", " ");
+            scanner = new Scanner(content);
             
             for (int row = 0; row < 8; row++) {
                 for (int col = 0; col < 8; col++) {
@@ -61,7 +62,6 @@ public class ImageHandler {
                     }
                 }
             }
-            scanner.close();
         } catch (Exception e) {
             // 如果读取失败，打印错误，并生成一个默认的 8x8 方块，保证你能看到车
             System.err.println("错误：无法读取模型文件 " + path + "，使用默认方块代替。");
@@ -69,53 +69,47 @@ public class ImageHandler {
             for(int i=0; i<8; i++) 
                 for(int j=0; j<8; j++) 
                     shape[i][j] = 1; // 填充为1，确保能画出来
+        } finally{
+            if(scanner!=null)
+                scanner.close();
         }
         return shape;
     }
 
-    // private static int[][] bikeShapeReader(String fin){
-    //     int[][] bikeShape = new int[8][8];
-    //     String path = "image/" + fin;
-
-    //     try(Scanner scanner = new Scanner(new /**/(path))){
-    //         for (int row = 0; row < 8; row++) {
-    //             for (int col = 0; col < 8; col++) {
-    //                 if (scanner.hasNextInt()) {
-    //                     bikeShape[row][col] = scanner.nextInt();
-    //                 }
-    //         }
-    //     }
-    //     }catch (Exception e) {
-    //         e.printStackTrace();
-    //     }
-
-    //     return bikeShape;
-    // }
-
     private static int[][] discoShapeReader(String fin){
         int[][] discoShape = new int[8][8];
         String path = "image/" + fin;
-
-        try(Scanner scanner = new Scanner(new FileInputStream(path))){
+        Scanner scanner = null;
+        try{
+            String content = com.badlogic.gdx.Gdx.files.internal(path).readString();
+            content = content.replace(",", " ");
+            scanner = new Scanner(content);
             for (int row = 0; row < 8; row++) {
                 for (int col = 0; col < 8; col++) {
                     if (scanner.hasNextInt()) {
                         discoShape[row][col] = scanner.nextInt();
                     }
+                }
             }
-        }
         }catch (Exception e) {
+            // 如果读取失败，打印错误，并生成一个默认的 8x8 方块，保证你能看到
+            System.err.println("错误：无法读取模型文件 " + path + "，使用默认方块代替。");
             e.printStackTrace();
+            for(int i=0; i<8; i++) 
+                for(int j=0; j<8; j++) 
+                    discoShape[i][j] = 1; // 填充为1，确保能画出来
+        }finally{
+            if(scanner!=null)
+                scanner.close();
         }
 
         return discoShape;
     }
 
     public void drawBike(Bike bike){
+          
         int baseX = bike.getX();
         int baseY = bike.getY();
-        if(arena.getCellValue(baseX, baseY)!=2)
-            return;
         Color color = bike.getColor();
         Direction dir = bike.gDirection();
         baseX *=CELL_SIZE;
@@ -162,9 +156,7 @@ public class ImageHandler {
     public void drawDisco(Disco disco){
         int baseX = disco.getX();
         int baseY = disco.getY();
-        int idNum = arena.getCellValue(baseX, baseY);
-        if(idNum!=5 && idNum!=6)
-            return;
+
         Color color = disco.getColor();
         baseX *=CELL_SIZE;
         baseX +=64;

@@ -74,13 +74,14 @@ public class Trail {
     public void dispose(){
         IDNUM = 0;
 
-    //Destroy the whole trail by setting the cell with ID 1(trail) to ID 0(trail)
+        //Destroy the whole trail by setting the cell with ID 1(trail) to ID 0(trail)
         for(TrailUnit unit: trailUnits){
             int x = unit.getX();
             int y = unit.getY();
             if(arena.getCellValue(x, y) == 1)
                 arena.setCellValue(x, y, IDNUM);
         }
+        trailUnits.clear();
     }
 
     public void drawTrail(ShapeRenderer painter){
@@ -88,8 +89,7 @@ public class Trail {
             int x = unit.getX();
             int y = unit.getY();
             painter.setColor(color);
-            if(arena.getCellValue(x, y)==1)
-                painter.rect(x*GameArena.CELL_SIZE+64, y*GameArena.CELL_SIZE+4, GameArena.CELL_SIZE, GameArena.CELL_SIZE);
+            painter.rect(x*GameArena.CELL_SIZE+64, y*GameArena.CELL_SIZE+4, GameArena.CELL_SIZE, GameArena.CELL_SIZE);
         }
     }
 }

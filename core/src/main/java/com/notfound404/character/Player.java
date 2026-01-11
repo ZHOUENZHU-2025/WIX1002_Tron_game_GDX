@@ -54,18 +54,18 @@ public class Player extends Bike {
                 case "tron":
                     // Tron: 平衡型角色
                     this.lp = this.maxLP = 50;
-                    this.speed = 9;
+                    this.speed = 5;
                     break;
                 case "kevin":
                 case "kelvin": // 容错处理
                     // Kevin: 高速度型角色
                     this.lp = this.maxLP = 20;
-                    this.speed = 15;
+                    this.speed = 9;
                     break;
                 default:
                     // 默认值
                     this.lp = this.maxLP = 90;
-                    this.speed = 9;
+                    this.speed = 5;
             }
         }
     }
