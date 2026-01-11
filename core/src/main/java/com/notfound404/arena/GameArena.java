@@ -222,6 +222,8 @@ public class GameArena {
     }
 
 
+    public Bike getPlayer(){ return playerBike; }
+
     public boolean gameOver(){return isGameOver;}
 
 }
