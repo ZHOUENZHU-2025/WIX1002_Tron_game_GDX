@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.notfound404.arena.GameArena;
 import com.notfound404.arena.GameArena.Direction;
 import com.notfound404.fileReader.ImageHandler;
+import com.notfound404.fileReader.MapLoader;
 
 
 /** Game screen where the main gameplay occurs. */
@@ -21,19 +22,31 @@ public class GameScreen implements Screen {
     //这里需要声明一些游戏内要用到的对象，例如车，地图，背景音乐等等
     private GameArena arena;
     private ImageHandler painter;
+    private String mapName;
 
     Vector3 touchPos;//Mouse position
 
-    GameScreen(Main game) {
+    GameScreen(Main game, String mapName) {
         this.game = game;
+        this.mapName = mapName;
         //Initialization Objects declared above
         //接下来初始化上面声明的对象，加载文件就在这里，可以写一些method或者class来增强可读性
 
-        //Input to Game configuration
-        //设置游戏：可能有读取存档和新游戏两种方案。现在只做新游戏
         arena = new GameArena();
         touchPos = new Vector3();
         painter = new ImageHandler(arena, game.shapeRenderer);
+
+        //Intialize map
+        loadMap();
+    }
+
+    //Load the map into Arena 
+    private void loadMap(){
+        MapLoader loader = new MapLoader();
+        loader.loadMap(arena, mapName);
+        
+        // Initialize Players/Enemies after map is loaded
+        arena.initPlayerAndEnemies();
     }
 
     @Override
@@ -43,10 +56,9 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        float deltaTime = Gdx.graphics.getDeltaTime();
         // Draw your screen here. "delta" is the time since last render in seconds.
-        input(deltaTime);
-        logic(deltaTime);
+        input(delta);
+        logic(delta);
         draw();
     }
 
@@ -66,13 +78,8 @@ public class GameScreen implements Screen {
 
             game.viewport.unproject(touchPos.set(Gdx.input.getX(), Gdx.input.getY(),0));
 
-
-            float arenaX = touchPos.x;
-            float arenaY = touchPos.y;
-
-
-            int gridX = (int) (arenaX / 9);   // CELL_SIZE
-            int gridY = (int) (arenaY / 9);   // CELL_SIZE
+            int gridX = (int) (touchPos.x / GameArena.CELL_SIZE);
+            int gridY = (int) (touchPos.y / GameArena.CELL_SIZE);
 
             if (gridX >= 0 && gridX < 44 && gridY >= 0 && gridY < 44) {
                 arena.inputShoot(gridX, gridY);

@@ -6,7 +6,10 @@ import java.util.Iterator;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.notfound404.character.*;
+
 import com.notfound404.fileReader.ImageHandler;
+
+import com.badlogic.gdx.math.GridPoint2;
 
 public class GameArena {
     
@@ -37,6 +40,13 @@ public class GameArena {
     * */
     private int[][] grid;
 
+    //MAP PROPERTIES
+    private char borderType = 'B'; // 'B' = Bordered (Wall), 'U' = Unbordered (Cliff)
+
+    // Optimization Lists: Do the list rather than 40*40 = 1600 map
+    public ArrayList<GridPoint2> wallList;
+    public ArrayList<GridPoint2> acceleratorList;
+
     //Defining directions for bike movement
     //Use W, A, S, D for UP, LEFT, DOWN, RIGHT respectively
     public enum Direction {
@@ -46,13 +56,13 @@ public class GameArena {
         RIGHT
     }
 
-    //All the Objects we need to draw(update) frame by frame
+    //Entities
     private ArrayList<Bike> bikes;
     private ArrayList<Explosion> explosions;
     private ArrayList<Disco> discos;
     private ArrayList<Trail> trails;
-
     private Bike playerBike;
+
     private final static int SHOOTSPAN = 3; //The span required between 2 times we check disco shoot. (unit: second)
     private float shootTimer;
 
@@ -64,23 +74,18 @@ public class GameArena {
 
 
     public GameArena() {
+        //Lists (int[][] also a list, isn't it?)
         grid = new int[ARENA_WIDTH + 2*BORDER_WIDTH][ARENA_HEIGHT + 2*BORDER_WIDTH];
-        //临时测试地图 全0
-        //边界：墙
-        for(int i = 0 ;i<ARENA_WIDTH + 2*BORDER_WIDTH;i++){
-            for(int j = 0;j<ARENA_HEIGHT + 2*BORDER_WIDTH;j++){
-                if(i<=1||j<=1||i>=ARENA_WIDTH + BORDER_WIDTH||j>=ARENA_HEIGHT + BORDER_WIDTH)
-                    grid[i][j] = 4;
-                else
-                    grid[i][j] = 0;
-            }
-        }
-        //以上包括注释正式版删除
         bikes = new ArrayList<Bike>();
         explosions = new ArrayList<Explosion>();
         discos = new ArrayList<Disco>();
         trails = new ArrayList<Trail>();
+        wallList = new ArrayList<>();
+        acceleratorList = new ArrayList<>();
 
+        clearMap();
+
+        //CUT
         //Create the first bike: Player
         //创建第一个玩家，类一定有玩家，固定列表第一个是玩家
         bikes.add(new Player("Tron","Tester", ARENA_SIZE/2, ARENA_SIZE/3, this));
@@ -94,6 +99,46 @@ public class GameArena {
         shootTimer = 0f;
 
         isGameOver = false;
+        //CUT
+    }
+
+    public void setBorderType(char type){
+        this.borderType = (type == 'U' ? 'U' : 'B' );
+    }
+
+    public char getBoardType(){return borderType; }
+
+    //reset Everything
+    public void clearMap() {
+        int borderVal = (borderType == 'U') ? -1 : 4;
+
+        for(int i = 0; i < ARENA_SIZE; i++){
+            for(int j = 0; j < ARENA_SIZE; j++){
+                // If in border region
+                if(i < BORDER_WIDTH || j < BORDER_WIDTH || i >= ARENA_WIDTH + BORDER_WIDTH || j >= ARENA_HEIGHT + BORDER_WIDTH) {
+                    grid[i][j] = borderVal;
+                } else {
+                    grid[i][j] = 0;
+                }
+            }
+        }
+    }
+    
+    //Load Map from the txt file(done by the fileReader)
+    public void scanAndInitLists() {
+        wallList.clear();
+        acceleratorList.clear();
+
+        for(int i = 0; i < ARENA_SIZE; i++){
+            for(int j = 0; j < ARENA_SIZE; j++){
+                int val = grid[i][j];
+                if (val == 4) {
+                    wallList.add(new GridPoint2(i, j));
+                } else if (val == 3) {
+                    acceleratorList.add(new GridPoint2(i, j));
+                }
+            }
+        }
     }
 
 
@@ -180,7 +225,7 @@ public class GameArena {
             }
         }
 
-        // 2. 安全地更新和移除 Bike
+        // Update & Remove Bike
         Iterator<Bike> bikeIt = bikes.iterator();
         while (bikeIt.hasNext()) {
             Bike bike = bikeIt.next();
@@ -191,38 +236,108 @@ public class GameArena {
             }
         }
 
-        // 3. 安全地更新和移除 Explosion
+        // Update & Remove Explosion
         Iterator<Explosion> expIt = explosions.iterator();
         while (expIt.hasNext()) {
             Explosion epl = expIt.next();
-            if (epl.update(deltaTime)) { // update 返回 true 表示播放完毕
+            if (epl.update(deltaTime)) { // update return true -> Explosion Play done 真表示播放完毕
                 expIt.remove();
             }
         }
+
+        for(GridPoint2 accelerator: acceleratorList){
+            if(grid[accelerator.x][accelerator.y]==0){
+                grid[accelerator.x][accelerator.y] = 3;
+            }
+        }
+
+
     }
 
+    // For AI to get the play's info
+    public Bike getPlayer() {
+        // Assuming the first bike added is the player.
+        if(!bikes.isEmpty()) return bikes.get(0);
+        return null;
+    }
+
+
     public void draw(ShapeRenderer shaper, ImageHandler painter){
+        
+        //Quickly draw the Border(No need to do grid by grid)
+        drawBorder(shaper);
+
         //Here we draw the whole map
-        for(Trail trail : trails){
+        for(Trail trail : trails)
             trail.drawTrail(shaper);
-        }
 
-        for(Disco disco : discos){
+        for(Disco disco : discos)
             painter.drawDisco(disco);
-        }
 
-        for(Bike bike : bikes){
+        for(Bike bike : bikes)
             painter.drawBike(bike);
+
+        for(GridPoint2 wall: wallList){
+            shaper.setColor(Color.WHITE);
+            shaper.rect(wall.x * CELL_SIZE, wall.y * CELL_SIZE, CELL_SIZE,CELL_SIZE);
         }
 
-        for(Explosion explosion: explosions){
-            explosion.draw(shaper);
+        for(GridPoint2 accelerator: acceleratorList){
+            if(grid[accelerator.x][accelerator.y]==3){
+                shaper.setColor(Color.YELLOW);
+                shaper.rect(accelerator.x * CELL_SIZE + CELL_SIZE /2f, accelerator.y * CELL_SIZE + CELL_SIZE/2f, CELL_SIZE/3f,CELL_SIZE/3f);
+            }
+            
         }
+
+        for(Explosion explosion: explosions)
+            explosion.draw(shaper);
         
     }
 
+    private void drawBorder(ShapeRenderer shaper) {
+        float fullSize = ARENA_SIZE * CELL_SIZE;
+        float borderSize = BORDER_WIDTH * CELL_SIZE;
 
-    public Bike getPlayer(){ return playerBike; }
+        if (borderType == 'B') {
+            // 'B': White Walls for border
+            shaper.setColor(Color.WHITE);
+            // Draw 4 rectangles for the border
+            shaper.rect(0, 0, fullSize, borderSize); // Bottom
+            shaper.rect(0, fullSize - borderSize, fullSize, borderSize); // Top
+            shaper.rect(0, borderSize, borderSize, fullSize - 2*borderSize); // Left
+            shaper.rect(fullSize - borderSize, borderSize, borderSize, fullSize - 2*borderSize); // Right
+
+        } else if (borderType == 'U') {
+            // 'U': Thin Red Line (Waring for Cliff)
+            shaper.setColor(Color.RED);
+            // line width
+            float lineThickness = 2f;
+            
+            // Draw inner edge of the border area
+            float start = borderSize;
+            float end = fullSize - borderSize;
+
+            shaper.rectLine(start, start, end, start, lineThickness); // Bottom Line
+            shaper.rectLine(start, end, end, end, lineThickness);     // Top Line
+            shaper.rectLine(start, start, start, end, lineThickness); // Left Line
+            shaper.rectLine(end, start, end, end, lineThickness);     // Right Line
+        }
+    }
+
+    //Initialization Method
+    public void initPlayerAndEnemies() {
+        // Reset lists
+        bikes.clear();
+        
+        // Add Player
+        Player p = new Player("Tron", "Tester", ARENA_SIZE/2, ARENA_SIZE/3, this);
+        addBike(p);
+        playerBike = p;
+
+        // Add Enemy
+        addBike(new Enemy(this, ARENA_SIZE/2, 2*ARENA_SIZE/3, Color.RED, 1));
+    }
 
     public boolean gameOver(){return isGameOver;}
 
