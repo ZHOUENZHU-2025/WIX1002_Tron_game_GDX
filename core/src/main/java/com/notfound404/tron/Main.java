@@ -26,7 +26,8 @@ public class Main extends Game {
         font.getData().setScale(viewport.getWorldHeight()/Gdx.graphics.getHeight());
 
         // Set the first screen
-        this.setScreen(new FirstScreen(this));
+        //this.setScreen(new FirstScreen(this));
+        this.setScreen(new MenuScreen(this));
     }
 
     @Override
