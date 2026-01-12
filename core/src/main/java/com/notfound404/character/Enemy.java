@@ -73,7 +73,7 @@ public class Enemy extends Bike {
     }
 
     public Enemy(GameArena arena, int x, int y, int difficulty) {
-        super(arena, x, y, 2, enemyColors[difficulty]);
+        super(arena, x, y, 2, enemyColors[difficulty-1]);
         this.difficulty = difficulty;
 
         this.levelSystem = new EnemyLevelSystem(difficulty);
