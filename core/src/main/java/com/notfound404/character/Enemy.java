@@ -2,14 +2,20 @@ package com.notfound404.character;
 
 import com.notfound404.arena.GameArena;
 import com.notfound404.arena.GameArena.Direction;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.notfound404.levelsystem.EnemyLevelSystem;
 import com.notfound404.levelsystem.BaseLevelSystem;
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.Random;
+import java.util.Scanner;
 
 public class Enemy extends Bike {
     public static int enemyCount = 0;
     public static int EXPplus = 0;
+    private final String enemyTypeName;
     
     private EnemyLevelSystem levelSystem; // 敌人的升级系统
     private int difficulty; // 敌人难度级别
@@ -22,13 +28,58 @@ public class Enemy extends Bike {
     private float shootCooldown;    // 射击冷却时间
     private Bike targetPlayer;      // 锁定的目标(玩家)
 
-    public Enemy(GameArena arena, int x, int y, Color color, int difficulty) {
-        super(arena, x, y, 2, color);
+    
+    //Info List, index is the difficulty-------- 1(Cannon Fodder) to 4(BOSS)
+    private static String[] enemyName;
+    private static Color[] enemyColors;
+    //Read the Enemies' info when first time we create a Player Object
+    static{
+        File enemyInfo = Gdx.files.internal("rider/Enemies.txt").file();
+
+        if (!enemyInfo.exists()) {
+            System.err.println("Enemy Info Loader Error: File not found " + enemyInfo.getAbsolutePath());
+            System.exit(0);
+        }
+
+        try(Scanner scanner = new Scanner(new FileInputStream(enemyInfo))){
+            enemyName = new String[4];
+            enemyColors = new Color[4];
+            while(scanner.hasNextLine()){
+                String[] entity = scanner.nextLine().split(",");
+                int difficultyIndex = Integer.parseInt(entity[1])-1;
+                enemyName[difficultyIndex] = entity[0];
+                switch(entity[2]){
+                    case "Gold":
+                        enemyColors[difficultyIndex] = Color.GOLD;
+                        break;
+                    case "Red":
+                        enemyColors[difficultyIndex] = Color.RED;
+                        break;
+                    case "Yellow":
+                        enemyColors[difficultyIndex] = Color.YELLOW;
+                        break;
+                    case "Green":
+                    default:
+                        enemyColors[difficultyIndex] = Color.GREEN;
+                        break;
+                }
+            }
+        }catch(Exception e){
+            System.out.println("File Input Exception.");
+            e.printStackTrace();
+            System.exit(0);
+        }
+
+    }
+
+    public Enemy(GameArena arena, int x, int y, int difficulty) {
+        super(arena, x, y, 2, enemyColors[difficulty]);
         this.difficulty = difficulty;
 
         this.levelSystem = new EnemyLevelSystem(difficulty);
         this.levelSystem.setEnemy(this);
-        
+        this.enemyTypeName = enemyName[difficulty];
+
         // 初始化 AI 参数 (难度越高，反应越快，射速越快)
         // 简化：用公式代替 switch 配置难度参数
         this.moveInterval = Math.max(0, 0.6f - (difficulty * 0.15f)); 

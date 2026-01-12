@@ -328,7 +328,8 @@ public class GameArena {
         playerBike = p;
 
         // Add Enemy
-        addBike(new Enemy(this, ARENA_SIZE/2, 2*ARENA_SIZE/3, Color.RED, 1));
+        safeCoordinate = getSafePosition();
+        addBike(new Enemy(this, safeCoordinate.x, safeCoordinate.y, 1));
     }
 
     //Randomly Generate an enemy

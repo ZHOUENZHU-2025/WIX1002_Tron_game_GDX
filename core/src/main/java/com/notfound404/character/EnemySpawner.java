@@ -15,7 +15,7 @@ public class EnemySpawner {
         Enemy easyEnemy = new Enemy(
             arena,          // Scene
             100, 200,       // x, y coordinate
-            Color.GREEN,    // Green for Easy level
+            //Color.GREEN,    // Green for Easy level
             1               // Initialized grade：1
         );
         System.out.println("Enemy(Easy): HP=" + easyEnemy.maxLP + ", Speed=" + easyEnemy.speed);
@@ -26,7 +26,7 @@ public class EnemySpawner {
         Enemy mediumEnemy = new Enemy(
             arena,
             100, 300,
-            Color.YELLOW,   // Yellow for Medium level
+            //Color.YELLOW,   // Yellow for Medium level
             5               // Initialized grade: 2
         );
         System.out.println("Enemy(Medium): HP=" + mediumEnemy.maxLP + ", Speed=" + mediumEnemy.speed);
@@ -37,7 +37,7 @@ public class EnemySpawner {
         Enemy hardEnemy = new Enemy(
             arena,
             100, 400,
-            Color.ORANGE,   // Orange for Hard level
+            //Color.ORANGE,   // Orange for Hard level
             10              // Initialized grade: 10
         );
         System.out.println("Enemy(Hard): HP=" + hardEnemy.maxLP + ", Speed=" + hardEnemy.speed);
@@ -48,7 +48,7 @@ public class EnemySpawner {
         Enemy extremeEnemy = new Enemy(
             arena,
             100, 500,
-            Color.RED,      // Red for Impossible
+            //Color.RED,      // Red for Impossible
             15              // Initialized grade: 15
         );
         System.out.println("Enemy(Impossible): HP=" + extremeEnemy.maxLP + ", Speed=" + extremeEnemy.speed);

@@ -88,7 +88,7 @@ public class MapLoader {
 
     
     private void loadMapFromFile(GameArena arena, String mapName) {
-        File mapFile = Gdx.files.internal("WIX1002_Tron_game_GDX-main/assets/map/" + mapName).file();
+        File mapFile = Gdx.files.internal("map/" + mapName).file();
 
         if (!mapFile.exists()) {
             System.err.println("MapLoader Error: File not found " + mapFile.getAbsolutePath());
