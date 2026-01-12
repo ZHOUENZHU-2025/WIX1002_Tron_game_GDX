@@ -10,6 +10,7 @@ import com.notfound404.character.*;
 import com.notfound404.fileReader.ImageHandler;
 
 import com.badlogic.gdx.math.GridPoint2;
+import java.util.Random;
 
 public class GameArena {
     
@@ -339,6 +340,27 @@ public class GameArena {
         addBike(new Enemy(this, ARENA_SIZE/2, 2*ARENA_SIZE/3, Color.RED, 1));
     }
 
+    //Randomly Generate an enemy
+    public void addNewEnemy(){
+        
+    }
+
+    //Get a random safe position
+    public GridPoint2 getSafePosition(){
+        Random gen = new Random();
+        int rx;
+        int ry;
+
+        do{
+            rx = gen.nextInt(ARENA_WIDTH) + BORDER_WIDTH;
+            ry = gen.nextInt(ARENA_HEIGHT) + BORDER_WIDTH;
+        }while(grid[rx][ry]!=0);
+
+        return new GridPoint2(rx, ry);
+    }
+
+    
+    
     public boolean gameOver(){return isGameOver;}
 
 }

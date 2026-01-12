@@ -9,6 +9,7 @@ import java.util.Random;
 
 public class Enemy extends Bike {
     public static int enemyCount = 0;
+    public static int EXPplus = 0;
     
     private EnemyLevelSystem levelSystem; // 敌人的升级系统
     private int difficulty; // 敌人难度级别
@@ -84,6 +85,15 @@ public class Enemy extends Bike {
         super.update(deltaTime);
     }
 
+    @Override
+    public void dispose(){
+        if(isDisposed()){
+            return;
+        }
+        super.dispose();
+        EXPplus+=getXPForDefeating();
+        enemyCount--;
+    }
     // ==========================================
     //           以下为整合的 AI 核心逻辑
     // ==========================================
@@ -219,4 +229,6 @@ public class Enemy extends Bike {
     public int getEnemyLevel() { return levelSystem.getCurrentLevel(); }
     public int getDifficulty() { return difficulty; }
     public EnemyLevelSystem getLevelSystem() { return levelSystem; }
+
+    public static void resetExpAcc(){EXPplus = 0; }
 }

@@ -170,5 +170,11 @@ public class Player extends Bike {
     public String getPlayerID() {
         return playerID;
     }
- 
+     
+    @Override
+    public void update(float deltaTime){
+        super.update(deltaTime);
+        exp+=Enemy.EXPplus;
+        Enemy.resetExpAcc();
+    }
 }
