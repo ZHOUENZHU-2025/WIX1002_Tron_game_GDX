@@ -43,7 +43,7 @@ public class MapLoader {
         arena.clearMap();
 
         // 3. 生成加速带 (3) - 数量显著增加，确保 3 > 4
-        // 生成 12-18 条加速带线路
+        // 至少17个
         int speedLines = rand.nextInt(7) + 17; 
         for (int i = 0; i < speedLines; i++) {
             int startX = rand.nextInt(PLAY_SIZE) + 2;
@@ -54,7 +54,7 @@ public class MapLoader {
         }
 
         // 4. 生成山体 (4) - 数量增加但少于加速带
-        // 生成 8-12 个山簇
+        // 至少15个
         int mountainClusters = rand.nextInt(5) + 15; 
         for (int i = 0; i < mountainClusters; i++) {
             int startX = rand.nextInt(PLAY_SIZE) + 2;
@@ -88,7 +88,7 @@ public class MapLoader {
 
     
     private void loadMapFromFile(GameArena arena, String mapName) {
-        File mapFile = Gdx.files.internal("map/" + mapName).file();
+        File mapFile = Gdx.files.internal("WIX1002_Tron_game_GDX-main/assets/map/" + mapName).file();
 
         if (!mapFile.exists()) {
             System.err.println("MapLoader Error: File not found " + mapFile.getAbsolutePath());

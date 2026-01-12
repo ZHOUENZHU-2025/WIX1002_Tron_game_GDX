@@ -23,12 +23,14 @@ public class GameScreen implements Screen {
     private GameArena arena;
     private ImageHandler painter;
     private String mapName;
+    private String heroType;
 
     Vector3 touchPos;//Mouse position
 
-    GameScreen(Main game, String mapName) {
+    GameScreen(Main game, String mapName, String heroType) {
         this.game = game;
         this.mapName = mapName;
+        this.heroType = heroType;
         //Initialization Objects declared above
         //接下来初始化上面声明的对象，加载文件就在这里，可以写一些method或者class来增强可读性
 
@@ -46,7 +48,7 @@ public class GameScreen implements Screen {
         loader.loadMap(arena, mapName);
         
         // Initialize Players/Enemies after map is loaded
-        arena.initPlayerAndEnemies("Tron");
+        arena.initPlayerAndEnemies(heroType);
     }
 
     @Override
