@@ -77,7 +77,7 @@ public class MenuScreen implements Screen {
     private void selectMenuItem() {
         switch (selectedIndex) {
             case 0: // START GAME
-                game.setScreen(new MapSelectionScreen(game));
+                game.setScreen(new PlayerSelectionScreen(game));
                 break;
             case 1: // LOAD SYSTEM
                 // TODO

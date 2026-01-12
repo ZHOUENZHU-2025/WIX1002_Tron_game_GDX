@@ -24,10 +24,10 @@ public class Player extends Bike {
 
     //Read the players' info when first time we create a Player Object
     static{
-        File heroInfo = Gdx.files.internal("rider/Players.txt").file();
+        File heroInfo = Gdx.files.internal("WIX1002_Tron_game_GDX-main/assets/rider/Players.txt").file();
 
         if (!heroInfo.exists()) {
-            System.err.println("MapLoader Error: File not found " + heroInfo.getAbsolutePath());
+            System.err.println("PlayerLoader Error: File not found " + heroInfo.getAbsolutePath());
             System.exit(0);
         }
 

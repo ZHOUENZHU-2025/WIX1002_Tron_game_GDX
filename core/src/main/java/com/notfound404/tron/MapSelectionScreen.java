@@ -13,6 +13,9 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 public class MapSelectionScreen implements Screen {
 
     private final Main game;
+
+    protected String heroType;
+
     private final String[] maps = {
         "Mirror Battery.txt",
         "Death Canyon.txt",
@@ -25,8 +28,9 @@ public class MapSelectionScreen implements Screen {
     private final Color ORANGE_GLOW = new Color(1f, 0.42f, 0f, 1f);
 
     //Constructor: Passing the Main done.
-    public MapSelectionScreen(Main game) {
+    public MapSelectionScreen(Main game, String heroType) {
         this.game = game;
+        this.heroType = heroType;
     }
 
     @Override
@@ -47,10 +51,10 @@ public class MapSelectionScreen implements Screen {
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             // Pass the selected map name to GameScreen
-            game.setScreen(new GameScreen(game, maps[selectedIndex]));
+            game.setScreen(new GameScreen(game, maps[selectedIndex], heroType));
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            game.setScreen(new MenuScreen(game));
+            game.setScreen(new PlayerSelectionScreen(game));
         }
     }
 
