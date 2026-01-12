@@ -17,10 +17,10 @@ public class MapLoader {
 
     //How many rows and cols we have for the file
     //Same as Arena 40 * 40
-    private final int FILE_ROWS = 40;
-    private final int FILE_COLS = 40;
+    private final int PLAY_SIZE = 40;
     private final int BORDER_WIDTH = 2;
     private final int FINAL_SIZE = 44;
+    private final Random rand = new Random();
 
     public void loadMap(GameArena arena, String mapName) {
         //Random Map Mode
@@ -35,33 +35,57 @@ public class MapLoader {
     /**
      * Generates a random map.
      */
-    private void loadRandomMap(GameArena arena) {
-        Random rand = new Random();
-        
-        // 1. Randomly decide border type (50% chance)
-        boolean isBordered = rand.nextBoolean();
-        arena.setBorderType(isBordered ? 'B' : 'U');
+    public void loadRandomMap(GameArena arena) {
+        // 1. 随机边界类型
+        arena.setBorderType(rand.nextBoolean() ? 'B' : 'U');
 
-        // 2. Clear arena first
+        // 2. 清空竞技场 (全部设为 0)
         arena.clearMap();
 
-        // 3. Generate internal 40x40
-        for (int r = 0; r < FILE_ROWS; r++) {
-            for (int c = 0; c < FILE_COLS; c++) {
-                int value = 0;
-                // 10% chance for wall, 5% for accelerator
-                float chance = rand.nextFloat();
-                if (chance < 0.1f) value = 4; // Wall
-                else if (chance < 0.15f) value = 3; // Accelerator
-                
-                // Set into arena (Offset by 2 for border padding)
-                arena.setCellValue(c + 2, r + 2, value);
-            }
+        // 3. 生成加速带 (3) - 数量显著增加，确保 3 > 4
+        // 生成 12-18 条加速带线路
+        int speedLines = rand.nextInt(7) + 17; 
+        for (int i = 0; i < speedLines; i++) {
+            int startX = rand.nextInt(PLAY_SIZE) + 2;
+            int startY = rand.nextInt(PLAY_SIZE) + 2;
+            // 长度较长，模拟道路
+            int length = rand.nextInt(10) + 12; 
+            drawCluster(arena, startX, startY, length, 3);
         }
-        
-        // Initialize the lists
+
+        // 4. 生成山体 (4) - 数量增加但少于加速带
+        // 生成 8-12 个山簇
+        int mountainClusters = rand.nextInt(5) + 15; 
+        for (int i = 0; i < mountainClusters; i++) {
+            int startX = rand.nextInt(PLAY_SIZE) + 2;
+            int startY = rand.nextInt(PLAY_SIZE) + 2;
+            // 山簇大小适中，保证不封死地图
+            int clusterSize = rand.nextInt(6) + 4; 
+            drawCluster(arena, startX, startY, clusterSize, 4);
+        }
+
+        // 5. 初始化列表 (光盘、坦克位置等扫描)
         arena.scanAndInitLists();
     }
+
+    /**
+     * 蔓延算法：通过随机步进让物体成群出现
+     */
+    private void drawCluster(GameArena arena, int x, int y, int size, int type) {
+        for (int i = 0; i < size; i++) {
+            // 确保在 40x40 游玩区域内 (坐标 2 到 41)
+            if (x >= 2 && x < 42 && y >= 2 && y < 42) {
+                // 如果当前位置已经是另一种物体，不再覆盖，以维持比例平衡
+                if (arena.getCellValue(x, y) == 0) {
+                    arena.setCellValue(x, y, type);
+                }
+            }
+            // 随机位移：让形状更自然，不只是直线
+            x += rand.nextInt(3) - 1; // -1, 0, 1
+            y += rand.nextInt(3) - 1; // -1, 0, 1
+        }
+    }
+
     
     private void loadMapFromFile(GameArena arena, String mapName) {
         File mapFile = Gdx.files.internal("map/" + mapName).file();
@@ -91,7 +115,7 @@ public class MapLoader {
             //Read the Map Body
             String line;
             int row = 0;
-            while ((line = reader.readLine()) != null && row < FILE_ROWS) {
+            while ((line = reader.readLine()) != null && row < PLAY_SIZE) {
                 String[] values = line.trim().split("[,\\s]+");
                 for (int col = 0; col < values.length && col < 44; col++) {
                     arena.setCellValue(col+2, row+2, Integer.parseInt(values[col]));
