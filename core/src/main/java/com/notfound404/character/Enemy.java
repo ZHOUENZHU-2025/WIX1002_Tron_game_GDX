@@ -33,22 +33,23 @@ public class Enemy extends Bike {
     private static String[] enemyName;
     private static Color[] enemyColors;
     //Read the Enemies' info when first time we create a Player Object
-    static{
-        File enemyInfo = Gdx.files.internal("rider/Enemies.txt").file();
-
-        if (!enemyInfo.exists()) {
-            System.err.println("Enemy Info Loader Error: File not found " + enemyInfo.getAbsolutePath());
-            System.exit(0);
-        }
-
-        try(Scanner scanner = new Scanner(new FileInputStream(enemyInfo))){
+    static {
+        // 关键改动：使用 Gdx.files.internal(...).reader() 代替 .file()
+        // 这会自动在 VS Code 的 assets 目录下查找，无需写死全路径
+        try (Scanner scanner = new Scanner(Gdx.files.internal("rider/Enemies.txt").reader())) {
             enemyName = new String[4];
             enemyColors = new Color[4];
-            while(scanner.hasNextLine()){
-                String[] entity = scanner.nextLine().split(",");
-                int difficultyIndex = Integer.parseInt(entity[1])-1;
+            
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                if (line.trim().isEmpty()) continue; // 跳过空行
+
+                String[] entity = line.split(",");
+                // 保持你的逻辑：解析难度索引并设置名称和颜色
+                int difficultyIndex = Integer.parseInt(entity[1]) - 1;
                 enemyName[difficultyIndex] = entity[0];
-                switch(entity[2]){
+                
+                switch (entity[2]) {
                     case "Gold":
                         enemyColors[difficultyIndex] = Color.GOLD;
                         break;
@@ -64,12 +65,12 @@ public class Enemy extends Bike {
                         break;
                 }
             }
-        }catch(Exception e){
-            System.out.println("File Input Exception.");
+        } catch (Exception e) {
+            // 保持你的错误处理和退出逻辑
+            System.err.println("Enemy Info Loader Error: Could not read internal enemy file.");
             e.printStackTrace();
             System.exit(0);
         }
-
     }
 
     public Enemy(GameArena arena, int x, int y, int difficulty) {

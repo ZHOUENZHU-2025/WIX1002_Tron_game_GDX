@@ -88,48 +88,41 @@ public class MapLoader {
 
     
     private void loadMapFromFile(GameArena arena, String mapName) {
-        File mapFile = Gdx.files.internal("map/" + mapName).file();
+    // 关键改动：直接使用 Gdx.files.internal(...).reader()
+    // 这样在 VS Code 里它会自动从 assets 开始找，不需要写全路径
+    try (BufferedReader reader = new BufferedReader(Gdx.files.internal("map/" + mapName).reader())) {
 
-        if (!mapFile.exists()) {
-            System.err.println("MapLoader Error: File not found " + mapFile.getAbsolutePath());
-            // Fallback to random if file fails
-            loadRandomMap(arena);
-            return;
+        // 1. Read Header
+        String header = reader.readLine();
+        if (header != null) {
+            header = header.trim().toUpperCase();
+            if (header.length() > 0) {
+                arena.setBorderType(header.charAt(0));
+            }
         }
 
-        try (FileInputStream fis = new FileInputStream(mapFile);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(fis))) {
+        // Fill the arena grids based on the new Border Type set above
+        arena.clearMap();
 
-            // Read Header
-            String header = reader.readLine();
-            if (header != null) {
-                header = header.trim().toUpperCase();
-                if (header.length() > 0) {
-                    arena.setBorderType(header.charAt(0));
-                }
+        // 2. Read the Map Body
+        String line;
+        int row = 0;
+        while ((line = reader.readLine()) != null && row < PLAY_SIZE) {
+            String[] values = line.trim().split("[,\\s]+");
+            for (int col = 0; col < values.length && col < 44; col++) {
+                // 保持你的变量名和逻辑不变
+                arena.setCellValue(col + 2, row + 2, Integer.parseInt(values[col]));
             }
-
-            //Fill the arena grids based on the new Border Type set above
-            arena.clearMap();
-
-            //Read the Map Body
-            String line;
-            int row = 0;
-            while ((line = reader.readLine()) != null && row < PLAY_SIZE) {
-                String[] values = line.trim().split("[,\\s]+");
-                for (int col = 0; col < values.length && col < 44; col++) {
-                    arena.setCellValue(col+2, row+2, Integer.parseInt(values[col]));
-                }
-                row++;
-            }
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            //Emergency: Do it Randomly
-            loadRandomMap(arena);
+            row++;
         }
-
-        // 4. Initialize the border lists
-        arena.scanAndInitLists();
+        
+    } catch (Exception e) {
+        // 如果读取失败，打印错误并进入随机地图模式
+        Gdx.app.error("MapLoader", "Error loading map: " + mapName, e);
+        loadRandomMap(arena);
     }
+
+    // 4. Initialize the border lists
+    arena.scanAndInitLists();
+}
 }

@@ -23,29 +23,28 @@ public class Player extends Bike {
     private static int[][] heroProperty;
 
     //Read the players' info when first time we create a Player Object
-    static{
-        File heroInfo = Gdx.files.internal("rider/Players.txt").file();
-
-        if (!heroInfo.exists()) {
-            System.err.println("PlayerLoader Error: File not found " + heroInfo.getAbsolutePath());
-            System.exit(0);
-        }
-
-        try(Scanner scanner = new Scanner(new FileInputStream(heroInfo))){
+    static {
+        // 1. 直接通过 LibGDX 的 internal 句柄获取 reader
+        // 这样即使在 VS Code 里，它也能自动定位到 assets/rider/Players.txt
+        try (Scanner scanner = new Scanner(Gdx.files.internal("rider/Players.txt").reader())) {
             heroName = new String[2];
             heroProperty = new int[2][2];
-            for(int i = 0;i < 2 ;i++){
-                String[] heroLine = scanner.nextLine().split(",");
-                heroName[i] = heroLine[0];
-                heroProperty[i][0] = Integer.parseInt(heroLine[1]);
-                heroProperty[i][1] = Integer.parseInt(heroLine[2]);
+            
+            for (int i = 0; i < 2; i++) {
+                if (scanner.hasNextLine()) {
+                    String[] heroLine = scanner.nextLine().split(",");
+                    heroName[i] = heroLine[0];
+                    heroProperty[i][0] = Integer.parseInt(heroLine[1]);
+                    heroProperty[i][1] = Integer.parseInt(heroLine[2]);
+                }
             }
-        }catch(Exception e){
-            System.out.println("File Input Exception.");
+        } catch (Exception e) {
+            // 保持你的错误处理逻辑
+            System.err.println("PlayerLoader Error: Could not read player info from internal path.");
             e.printStackTrace();
+            // 注意：在某些环境下 System.exit(0) 可能会导致调试中断，但保留你的原始逻辑
             System.exit(0);
         }
-
     }
 
     public Player(String playerType, int startX, int startY, GameArena arena) {

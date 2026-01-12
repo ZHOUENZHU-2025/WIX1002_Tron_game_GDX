@@ -36,7 +36,7 @@ class Disco extends Mobile {
         isActive = true;
         accumulatorX = accumulatorY =0;
         color = master.color;
-        speed = 10;
+        speed = 20f;
     }
 
 
