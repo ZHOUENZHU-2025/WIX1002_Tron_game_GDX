@@ -403,7 +403,11 @@ public class GameArena {
         return new GridPoint2(rx, ry);
     }
 
-    
+
+    //ui显示调用
+    public Player getPlayerBike() {
+    return (Player) this.playerBike;
+}
     
     public boolean gameOver(){return isGameOver;}
 
