@@ -136,6 +136,7 @@ public class Player extends Bike {
     }
 
     //获取玩家当前等级
+    //生成敌人系统调用get
     public int getPlayerLevel() {
         return levelSystem.getCurrentLevel();
     }
@@ -200,7 +201,10 @@ public class Player extends Bike {
     @Override
     public void update(float deltaTime){
         super.update(deltaTime);
-        exp+=Enemy.EXPplus;
+        //exp+=Enemy.EXPplus;
+        // 修改点：直接将全局经验加入到升级系统中
+        levelSystem.addXP(Enemy.EXPplus); 
         Enemy.resetExpAcc();
+        Enemy.EXPplus = 0;
     }
 }
