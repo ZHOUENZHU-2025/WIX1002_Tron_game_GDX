@@ -6,12 +6,13 @@ import java.io.*;
 import java.util.Scanner;
 
 import com.badlogic.gdx.Gdx;
+//import com.notfound404.arena.GameArena.Direction;
 
 //This class manages archives from players, which are also entities/lines on the leaderboard.
 public class ArchiveManager {
 
     final private static String LEADERBOARD_FILE = "Score/leaderboard.txt";
-    final private static String ARCHIEVE_FILE = "Score/archive.txt";
+    final private static String ARCHIVE_FILE = "Score/archive.txt";
 
     public static class ArchiveEntry implements Comparable<ArchiveEntry>{
         public final String playerID;
@@ -21,8 +22,9 @@ public class ArchiveManager {
         public final String map;
         
         //For archives, but not Random map.
-        public int x;
-        public int y;
+        //public int x;
+        //public int y;
+        //public Direction dir;
         
         public ArchiveEntry(String ID, String heroType, String map,int level, int score){
             this.playerID = ID;
@@ -31,6 +33,19 @@ public class ArchiveManager {
             this.level = level;
             this.score = score;
         }
+
+        //The other constructor to record the position
+        //But we choose to randomly generate a safe position
+        // public ArchiveEntry(String ID, String heroType, String map,int level, int score,int x, int y, Direction dir){
+        //     this.playerID = ID;
+        //     this.heroType = heroType;
+        //     this.map = map;
+        //     this.level = level;
+        //     this.score = score;
+        //     this.x = x;
+        //     this.y = y;
+        //     this.dir = dir;
+        // }
 
         @Override
         public String toString(){
@@ -62,7 +77,7 @@ public class ArchiveManager {
     // Save Score to archive library
     // 存档录入
     public static void saveScoreAch(ArchiveEntry newRecord) {
-        try(PrintWriter lbPW = new PrintWriter(new FileWriter(ARCHIEVE_FILE,true))){
+        try(PrintWriter lbPW = new PrintWriter(new FileWriter(ARCHIVE_FILE,true))){
             lbPW.println(newRecord);
         }catch(FileNotFoundException e){
             System.err.println("Archive Saving Error: Could not save your score info from internal path.");
@@ -109,7 +124,7 @@ public class ArchiveManager {
     //Read an Archive with a given player ID
     public static ArchiveEntry getArchive(String playerID){
         ArrayList<ArchiveEntry> scores = new ArrayList<>();
-        try (Scanner scanner = new Scanner(Gdx.files.internal(ARCHIEVE_FILE).reader())) {
+        try (Scanner scanner = new Scanner(Gdx.files.internal(ARCHIVE_FILE).reader())) {
             while(scanner.hasNextLine()){
                 String[] line = scanner.nextLine().split(",");
                 try {

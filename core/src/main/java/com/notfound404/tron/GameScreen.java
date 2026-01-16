@@ -2,28 +2,34 @@ package com.notfound404.tron;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.notfound404.arena.GameArena;
 import com.notfound404.arena.GameArena.Direction;
 import com.notfound404.character.Player;
+import com.notfound404.fileReader.ArchiveManager;
 import com.notfound404.fileReader.ImageHandler;
 import com.notfound404.fileReader.MapLoader;
 import com.notfound404.tron.StoryManager.Dialogue;
 
 
 /** Game screen where the main gameplay occurs. */
-public class GameScreen implements Screen {
+public class GameScreen implements Screen, InputProcessor {
     //uistory
     private StoryManager storyManager = new StoryManager();
-    private com.badlogic.gdx.graphics.Texture currentPortrait;
+    private Texture currentPortrait;
     private String lastPortraitPath = "";
     private int lastStoryLevel = 1; // 追踪等级变化
+
+    //Store player's ID input
+    private String playerIDInput = "";
 
     public final Main game;
     //private static final int FONT_SCALE = 5?;
@@ -32,24 +38,24 @@ public class GameScreen implements Screen {
     private static final float UI_LINE_SPACING = 15f;
     private static final float ICON_SIZE = 20f;
 
-    Texture discoTexture;
-    Texture fullLPTexture;
-    Texture halfLPTexture;
+    private Texture discoTexture;
+    private Texture fullLPTexture;
+    private Texture halfLPTexture;
     //Here need to declare objects will be used in the Game.
     //这里需要声明一些游戏内要用到的对象，例如车，地图，背景音乐等等
     private GameArena arena;
     private ImageHandler painter;
     private String mapName;
     private String heroType;
-    private boolean hasPrompt;
     private boolean overHandling = false;
+    private boolean callSave = false;
+    private boolean saveHandling = false;
     Vector2 touchPos;//Mouse position
 
     GameScreen(Main game, String mapName, String heroType) {
         this.game = game;
         this.mapName = mapName;
         this.heroType = heroType;
-        this.hasPrompt = false;
 
         //Initialization Objects declared above
         //接下来初始化上面声明的对象，加载文件就在这里，可以写一些method或者class来增强可读性
@@ -84,7 +90,7 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         // Draw your screen here. "delta" is the time since last render in seconds.
         //If we are in the handling process draw only, no logic processing.
-        if(overHandling){
+        if(overHandling||saveHandling){
             drawGameScene();
             return;
         }
@@ -100,7 +106,13 @@ public class GameScreen implements Screen {
         if (!storyManager.isActive()) {
             if (arena.gameOver()||arena.userWin()) {
                 //Handle the over of our game
-                handleGameOver();
+                if (!overHandling)
+                    handleGameOver();
+            } else if(callSave){
+                callSave = false;
+                if(!saveHandling)
+                    handleSave();
+
             } else {
                 logic(delta); // Continue performing logic
                 //Check again after logic performed
@@ -133,16 +145,47 @@ public class GameScreen implements Screen {
     //Seal the game scene drawing process
     private void drawGameScene(){
         ScreenUtils.clear(Color.BLACK);
-            game.viewport.apply(); 
+        game.viewport.apply(); 
 
-            game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
-            game.shapeRenderer.setProjectionMatrix(game.viewport.getCamera().combined);
+        game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
+        game.shapeRenderer.setProjectionMatrix(game.viewport.getCamera().combined);
 
-            draw(); 
-            
-            if (storyManager.isActive()) {
-                renderStoryUI(); 
-            }
+        draw(); 
+        
+        if (storyManager.isActive()) {
+            renderStoryUI(); 
+        }
+
+        drawPrompt();
+    }
+    //Draw prompt if the game is over
+    private void drawPrompt(){
+        if (overHandling||saveHandling) {
+            //Veil to hide the game arena
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            game.shapeRenderer.begin(ShapeType.Filled);
+            game.shapeRenderer.setColor(0, 0, 0, 0.7f);
+            game.shapeRenderer.rect(0, 0, game.viewport.getWorldWidth(), game.viewport.getWorldHeight());
+            game.shapeRenderer.end();
+            Gdx.gl.glDisable(GL20.GL_BLEND);
+
+            float promptX = game.viewport.getWorldWidth()/2f;
+            float promptY = game.viewport.getWorldHeight()/2f + 45f;
+            game.batch.begin();
+            String promptTitle = overHandling ?"MISSION COMPLETE!":"Archive";
+            game.font.setColor(Color.YELLOW);
+            GlyphLayout layout = new GlyphLayout(game.font, promptTitle);
+            game.font.draw(game.batch, promptTitle, promptX - layout.width/2, promptY);
+            promptY -= 50;
+            game.font.setColor(Color.WHITE);
+            layout = new GlyphLayout(game.font, "Enter Name: " + playerIDInput + "_");
+            game.font.draw(game.batch, "Enter Name: " + playerIDInput + "_", promptX - layout.width/2, promptY);
+            promptY -= 50;
+            game.font.setColor(Color.GRAY);
+            layout = new GlyphLayout(game.font, "[Press ENTER]");
+            game.font.draw(game.batch, "[Press ENTER]", promptX - layout.width/2, promptY);
+            game.batch.end();
+        }
     }
 
     // 5. 渲染剧情 UI
@@ -204,6 +247,8 @@ private void renderStoryUI() {
             arena.inputDir(Direction.LEFT);
         } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             arena.inputDir(Direction.RIGHT);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)){
+            callSave = true;
         }
 
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
@@ -244,10 +289,14 @@ private void renderStoryUI() {
 
     private void handleGameOver(){
         overHandling = true;
-        NameInputListener listener = new NameInputListener(game, arena.getPlayerBike(), mapName);
+        // Move the control to self(inputProcessor part)
+        Gdx.input.setInputProcessor(this);
+    }
 
-        // A prompt displayed
-        Gdx.input.getTextInput(listener, "MISSION ACCOMPLISHED", "User", "Enter ID");
+    private void handleSave(){
+        saveHandling = true;
+        // Move the control to self(inputProcessor part)
+        Gdx.input.setInputProcessor(this);
     }
 
     private void drawUI() {
@@ -341,8 +390,9 @@ private void renderStoryUI() {
     // 调整字体缩放，让UI文字稍微小一点更精致 (可选)
     // game.font.getData().setScale(0.8f);
 
-    float textY = lpBarY + barHeight + 25f; // 
+    float textY = lpBarY + barHeight + 25f;
     
+    //==========================================================================
     //血条和等级数值改为右侧显示
     //The old version: display the LP and Level under the screen
 
@@ -352,6 +402,7 @@ private void renderStoryUI() {
     // // 中间：血量数值
     // String lpText = "HP: " + (int)player.getLP() + " / " + (int)player.getMaxLP();
     // game.font.draw(game.batch, lpText, screenWidth / 2f - 45, textY);
+    //==========================================================================
     
     // 右侧：经验百分比
     String xpText = String.format("XP: %.1f%%", xpProgress * 100);
@@ -390,6 +441,86 @@ private void renderStoryUI() {
     public void dispose() {
         // Destroy screen's assets here.
         if (currentPortrait != null) currentPortrait.dispose();
+        if (discoTexture != null) discoTexture.dispose();
+        if (fullLPTexture != null) fullLPTexture.dispose();
+        if (halfLPTexture != null) halfLPTexture.dispose();
          // 如果 painter 或其他对象有 texture，也要 dispose
+
     }
+
+    //Implement input-processor
+    @Override
+    public boolean keyTyped(char character){
+        //Here we simulating a real-time keyboard input process
+        if(overHandling||saveHandling){
+            // Enter means confirming (End input)
+            if (character == '\r' || character == '\n') {
+                confirmName();
+            }
+            // BackSpace
+            else if (character == 8) {
+                if (playerIDInput.length() > 0) {
+                    // Delete the last char
+                    playerIDInput = playerIDInput.substring(0, playerIDInput.length() - 1);
+                }
+            }
+            // concatenate
+            else if (playerIDInput.length() < 12) {
+                // visible/normal char(letters and numbers etc.) only
+                if (character >= 32 && character <= 126) {
+                    playerIDInput += character;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private void confirmName() {
+        //Default Value
+        if (playerIDInput.length() == 0) {
+            playerIDInput = "Unknown";
+        }
+        
+        //Release the input control (or we can't use it on the main menu)
+        Gdx.input.setInputProcessor(null);
+
+        if(overHandling){
+            // Store ur grade into the leaderboard
+            ArchiveManager.saveScoreLB(
+                new ArchiveManager.ArchiveEntry(
+                    playerIDInput, 
+                    heroType,
+                    mapName,
+                    arena.getPlayerBike().getPlayerLevel(), 
+                    arena.getPlayerBike().getExp()
+                )
+            );
+        }else if(saveHandling){
+            //Save the data to archive library
+            ArchiveManager.saveScoreAch(
+                new ArchiveManager.ArchiveEntry(
+                    playerIDInput, 
+                    heroType,
+                    mapName,
+                    arena.getPlayerBike().getPlayerLevel(), 
+                    arena.getPlayerBike().getExp()
+                )
+            );
+        }
+
+        //LB screen
+        game.setScreen(new LeaderBoard(game));
+        
+    }
+    
+    //No use
+    @Override public boolean keyDown(int keycode) { return false; }
+    @Override public boolean keyUp(int keycode) { return false; }
+    @Override public boolean touchDown(int screenX, int screenY, int pointer, int button) { return false; }
+    @Override public boolean touchUp(int screenX, int screenY, int pointer, int button) { return false; }
+    @Override public boolean touchDragged(int screenX, int screenY, int pointer) { return false; }
+    @Override public boolean mouseMoved(int screenX, int screenY) { return false; }
+    @Override public boolean scrolled(float amountX, float amountY) { return false; }
+    @Override public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {return false;}
 }

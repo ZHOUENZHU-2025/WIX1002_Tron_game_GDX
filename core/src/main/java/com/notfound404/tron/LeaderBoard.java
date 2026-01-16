@@ -40,7 +40,7 @@ public class LeaderBoard implements Screen{
         y-=30;
         
         for (ArchiveEntry entry : topPlayers) {
-            String text = rank + "      " + entry.playerID + "     " + entry.level + "    " + entry.score + "    "+ entry.level;
+            String text = String.format("%-2d.    %12s   %3d          %6d        %5s", rank, entry.playerID, entry.level, entry.score, entry.level);
             game.font.draw(game.batch, text, 150, y);
             y -= 30;
             rank++;

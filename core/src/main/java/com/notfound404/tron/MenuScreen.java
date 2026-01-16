@@ -16,7 +16,7 @@ public class MenuScreen implements Screen {
         "START GAME",
         "LOAD SYSTEM", 
         "OPTIONS",
-        "CREDITS",
+        "RANKS",
         "EXIT"
     };
     
@@ -93,8 +93,8 @@ public class MenuScreen implements Screen {
             case 2: // OPTIONS
                 // TODO
                 break;
-            case 3: // CREDITS
-                // TODO
+            case 3: // RANKS
+                game.setScreen(new LeaderBoard(game));
                 break;
             case 4: // EXIT
                 Gdx.app.exit();
