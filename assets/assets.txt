@@ -6,3 +6,6 @@ map/Death Canyon.txt
 map/Mirror Battery.txt
 rider/Enemies.txt
 rider/Players.txt
+uistory/boss.png
+uistory/女主3.0.png
+uistory/小兵.png
