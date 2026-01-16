@@ -38,6 +38,14 @@ public class MapSelectionScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        //Viewport Setting
+        game.viewport.apply();
+
+        //Fix our painters to the coordinates of camera
+        //绑定画图工具的坐标到相机坐标系
+        game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
+        game.shapeRenderer.setProjectionMatrix(game.viewport.getCamera().combined);
+
         handleInput();
         drawUI();
     }
@@ -59,14 +67,14 @@ public class MapSelectionScreen implements Screen {
     }
 
     private void drawUI() {
-        float centerX = Gdx.graphics.getWidth() / 2f;
-        float startY = Gdx.graphics.getHeight() / 2f + 50f;
+        float centerX = game.viewport.getWorldWidth() / 2f;
+        float startY = game.viewport.getWorldHeight() / 2f + 50f;
         
         game.batch.begin();
         
         // Header
         game.font.setColor(CYAN_GLOW);
-        game.font.draw(game.batch, "SELECT GRID", centerX - 100, Gdx.graphics.getHeight() - 100);
+        game.font.draw(game.batch, "SELECT GRID", centerX - 100, game.viewport.getWorldHeight() - 100);
 
         // List
         for (int i = 0; i < maps.length; i++) {

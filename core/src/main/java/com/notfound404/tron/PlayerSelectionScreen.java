@@ -28,6 +28,13 @@ public class PlayerSelectionScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        game.viewport.apply();
+
+        //Fix our painters to the coordinates of camera
+        //绑定画图工具的坐标到相机坐标系
+        game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
+        game.shapeRenderer.setProjectionMatrix(game.viewport.getCamera().combined);
+
         handleInput();
         drawUI();
     }
@@ -49,16 +56,16 @@ public class PlayerSelectionScreen implements Screen {
     }
 
     private void drawUI() {
-        float centerX = Gdx.graphics.getWidth() / 2f;
+        float centerX = game.viewport.getWorldWidth() / 2f;
         game.batch.begin();
 
         // 标题
         game.font.setColor(CYAN_GLOW);
-        game.font.draw(game.batch, "SELECT YOUR PROGRAM", centerX - 120, Gdx.graphics.getHeight() - 100);
+        game.font.draw(game.batch, "SELECT YOUR PROGRAM:", centerX - 120, game.viewport.getWorldHeight() - 100);
 
         // 选项渲染
         for (int i = 0; i < heroes.length; i++) {
-            float y = Gdx.graphics.getHeight() / 2f - i * 60f;
+            float y = game.viewport.getWorldHeight() / 2f - i * 60f;
             GlyphLayout layout = new GlyphLayout(game.font, heroes[i]);
             
             if (i == selectedIndex) {
