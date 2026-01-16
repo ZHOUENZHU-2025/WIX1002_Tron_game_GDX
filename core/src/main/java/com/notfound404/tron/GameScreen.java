@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -12,10 +14,16 @@ import com.notfound404.arena.GameArena.Direction;
 import com.notfound404.character.Player;
 import com.notfound404.fileReader.ImageHandler;
 import com.notfound404.fileReader.MapLoader;
+import com.notfound404.tron.StoryManager.Dialogue;
 
 
 /** Game screen where the main gameplay occurs. */
 public class GameScreen implements Screen {
+    //uistory
+    private StoryManager storyManager = new StoryManager();
+    private com.badlogic.gdx.graphics.Texture currentPortrait;
+    private String lastPortraitPath = "";
+    private int lastStoryLevel = 1; // 追踪等级变化
 
     public final Main game;
 
@@ -32,6 +40,7 @@ public class GameScreen implements Screen {
         this.game = game;
         this.mapName = mapName;
         this.heroType = heroType;
+
         //Initialization Objects declared above
         //接下来初始化上面声明的对象，加载文件就在这里，可以写一些method或者class来增强可读性
 
@@ -41,6 +50,7 @@ public class GameScreen implements Screen {
 
         //Initialize map
         loadMap();
+        storyManager.trigger("START");
     }
 
     //Load the map into Arena 
@@ -60,10 +70,100 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         // Draw your screen here. "delta" is the time since last render in seconds.
-        input(delta);
-        logic(delta);
-        draw();
+        if (storyManager.isActive()) {
+            if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+                storyManager.next();
+            }
+        } else {
+            input(delta); // 只有剧情结束才响应赛车控制
+        }
+        
+        // 2. 逻辑更新：剧情模式下暂停游戏逻辑
+        if (!storyManager.isActive()) {
+            logic(delta); 
+            // 在 logic 之外单独检测剧情触发点
+            checkStoryEvents(); 
+        }
+
+        // --- 修复核心：确保 Viewport 应用并清除屏幕 ---
+        ScreenUtils.clear(Color.BLACK);
+        game.viewport.apply(); // 确保视口正确应用
+        draw(); 
+        
+        if (storyManager.isActive()) {
+        // 重置 Batch 和 ShapeRenderer 的矩阵，确保它们对齐当前视口坐标
+        game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
+        game.shapeRenderer.setProjectionMatrix(game.viewport.getCamera().combined);
+        renderStoryUI(); 
     }
+    }
+
+    // 4. 检查剧情触发 (根据玩家等级)
+    private void checkStoryEvents() {
+        int currentLevel = arena.getPlayerBike().getPlayerLevel();
+    
+    if (currentLevel != lastStoryLevel) {
+        // 每当等级提升，判断是否符合特定的对话触发点
+        if (currentLevel == 20 || currentLevel == 40 || currentLevel == 60 || currentLevel == 80) {
+            storyManager.trigger("REINFORCE");
+        } else if (currentLevel == 10 || currentLevel == 41 || currentLevel == 71) {
+            // 对应你 addNewEnemy 里的难度跳跃点
+            storyManager.trigger("STRONGER");
+        } else if (currentLevel == 99) {
+            storyManager.trigger("FINAL");
+        }
+        lastStoryLevel = currentLevel;
+    }
+}
+
+    // 5. 渲染剧情 UI
+private void renderStoryUI() {
+    Dialogue d = storyManager.cur();
+    if (d == null) return;
+
+    // 重新同步矩阵，防止偏移
+    game.shapeRenderer.setProjectionMatrix(game.viewport.getCamera().combined);
+    game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
+
+    // A. 变暗遮罩 (Shape)
+    Gdx.gl.glEnable(GL20.GL_BLEND);
+    game.shapeRenderer.begin(ShapeType.Filled);
+    game.shapeRenderer.setColor(0, 0, 0, 0.7f);
+    game.shapeRenderer.rect(0, 0, game.viewport.getWorldWidth(), game.viewport.getWorldHeight());
+    game.shapeRenderer.end();
+    Gdx.gl.glDisable(GL20.GL_BLEND);
+
+    // B. 加载立绘
+    String path = "uistory/" + d.portrait;
+    if (!path.equals(lastPortraitPath)) {
+        if (currentPortrait != null) currentPortrait.dispose();
+        currentPortrait = new com.badlogic.gdx.graphics.Texture(Gdx.files.internal(path));
+        lastPortraitPath = path;
+    }
+
+    game.batch.begin();
+    // 画人物（左侧）
+    game.batch.draw(currentPortrait, 10, 80, 150, 220);
+    
+    // 画对话框背景
+    game.batch.end();
+    game.shapeRenderer.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled);
+    game.shapeRenderer.setColor(0.1f, 0.1f, 0.2f, 0.9f);
+    game.shapeRenderer.rect(10, 10, game.viewport.getWorldWidth()-20, 70);
+    game.shapeRenderer.end();
+    
+    game.batch.begin();
+    // 画名字和文本
+    game.font.setColor(com.badlogic.gdx.graphics.Color.CYAN);
+    game.font.draw(game.batch, d.name, 30, 70);
+    game.font.setColor(com.badlogic.gdx.graphics.Color.WHITE);
+    game.font.draw(game.batch, d.text, 30, 45);
+    
+    // 提示
+    game.font.setColor(com.badlogic.gdx.graphics.Color.YELLOW);
+    game.font.draw(game.batch, "NEXT [L-Click]", game.viewport.getWorldWidth()-120, 25);
+    game.batch.end();
+}
 
     private void input(float delta){
 
@@ -96,8 +196,7 @@ public class GameScreen implements Screen {
     }
 
     private void draw(){
-        //Clean the screen
-        ScreenUtils.clear(Color.BLACK);
+        //render中，清过屏了
         game.shapeRenderer.setProjectionMatrix(game.viewport.getCamera().combined);
         game.shapeRenderer.begin(ShapeType.Filled);
 
@@ -200,6 +299,7 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         // Destroy screen's assets here.
-        
+        if (currentPortrait != null) currentPortrait.dispose();
+         // 如果 painter 或其他对象有 texture，也要 dispose
     }
 }
