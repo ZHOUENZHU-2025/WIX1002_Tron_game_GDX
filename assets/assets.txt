@@ -1,6 +1,11 @@
 .gitkeep
+Score/archive.txt
+Score/leaderboard.txt
 image/bike.txt
+image/disco.png
 image/disco.txt
+image/fullHeart.png
+image/halfHeart.png
 map/Accelerate Territory.txt
 map/Death Canyon.txt
 map/Mirror Battery.txt

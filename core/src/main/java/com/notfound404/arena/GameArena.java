@@ -70,10 +70,8 @@ public class GameArena {
     private float shootTimer;
 
     private boolean isGameOver;
-    //这里稍后再添加一个胜利判断布尔变量
-    //private boolean isTriumph;
-    //再来一个BOSS 是否上过场的布尔变量
-    //private boolean isBossOn;
+    //Win!
+    private boolean isTriumph;
 
 
     public GameArena() {
@@ -198,14 +196,14 @@ public class GameArena {
             isGameOver = true;
             return;
         }
+        
+        //Here we check is we win
+        isTriumph = isBossSpawned && Enemy.enemyCount==0;
+        if(isTriumph){
+            return;
+        }
         //每帧生成敌人
         addNewEnemy();
-
-        //这里写后续写检测敌人的功能
-        /** 没有敌人就检测是否胜利（最终BOSS 'CLU'被干碎)
-         * 胜利就直接设置胜利boolean变量并返回
-         *有敌人就比较最大敌人数量和生成间隔，满足条件就用随机生成方法生成一个新敌人
-        */
             
         //Check the state. Then Update the state. Leave disposal to the next time
         Iterator<Disco> discoIt = discos.iterator();
@@ -406,9 +404,10 @@ public class GameArena {
 
     //ui显示调用
     public Player getPlayerBike() {
-    return (Player) this.playerBike;
-}
+        return (Player) this.playerBike;
+    }
     
     public boolean gameOver(){return isGameOver;}
+    public boolean userWin(){return isTriumph; }
 
 }
