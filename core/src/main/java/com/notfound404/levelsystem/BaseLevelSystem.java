@@ -6,10 +6,10 @@ package com.notfound404.levelsystem;
 public abstract class BaseLevelSystem {
     
     // --- 基础配置常量 ---
-    protected static final double BASE_XP_PER_CELL = 5; // 每移动一格获得的经验
-    protected static final int BASE_XP_CAP = 300;        // 1级升2级的基础经验上限
-    protected static final double XP_CAP_MULTIPLIER = 1.5; // 每升一级，下一级所需经验翻1.5倍
-    protected static final double STAT_MULTIPLIER = 1.1;   // 每次升级属性（血量/速度）提升10%
+    protected static final double BASE_XP_PER_CELL = 6; // 每移动一格获得的经验
+    protected static final int BASE_XP_CAP = 200;        // 1级升2级的基础经验上限
+    protected static final double XP_CAP_MULTIPLIER = 1.03; // 每升一级，下一级所需经验翻1.5倍
+    protected static final double STAT_MULTIPLIER = 1.04;   // 每次升级属性（血量/速度）提升10%
     
     // --- 动态运行数据 ---
     protected int currentLevel = 1;      // 当前等级
