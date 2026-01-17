@@ -64,4 +64,20 @@ public abstract class BaseLevelSystem {
     public float getXPPercentage() {
         return (float)(currentXP / currentXPCap);
     }
+
+    /**
+    * 从存档恢复等级数据
+    */
+    public void loadFromSave(int level, int xpData) {
+    this.currentLevel = level;
+    this.currentXP = (double) xpData;
+    
+    // 重新计算经验上限，保证UI进度条正确
+    this.currentXPCap = BASE_XP_CAP * Math.pow(XP_CAP_MULTIPLIER, currentLevel - 1);
+    
+    // 触发属性同步：让 Bike 的 LP 和 Speed 立即匹配当前等级
+    applyBaseStatUpgrade();
+}
+
+
 }
