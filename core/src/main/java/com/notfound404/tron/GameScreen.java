@@ -24,7 +24,7 @@ import com.notfound404.fileReader.StoryManager.Dialogue;
 
 /** Game screen where the main gameplay occurs. */
 public class GameScreen implements Screen, InputProcessor {
-    //uistory
+    //UI_Story
     private StoryManager storyManager = new StoryManager();
     private Texture currentPortrait;
     private String lastPortraitPath = "";
@@ -52,6 +52,7 @@ public class GameScreen implements Screen, InputProcessor {
     private boolean overHandling = false;
     private boolean callSave = false;
     private boolean saveHandling = false;
+    private String gameOverPrompt = "";
     Vector2 touchPos;//Mouse position
 
     GameScreen(Main game, String mapName, String heroType) {
@@ -148,6 +149,7 @@ public class GameScreen implements Screen, InputProcessor {
             if (arena.gameOver()||arena.userWin()) {
                 //Handle the over of our game
                 if (!overHandling)
+                    gameOverPrompt = arena.userWin() ? "MISSION COMPLETE!":"YOU FAILED";
                     handleGameOver();
             } else if(callSave){
                 callSave = false;
@@ -213,7 +215,7 @@ public class GameScreen implements Screen, InputProcessor {
             float promptX = game.viewport.getWorldWidth()/2f;
             float promptY = game.viewport.getWorldHeight()/2f + 45f;
             game.batch.begin();
-            String promptTitle = overHandling ?"MISSION COMPLETE!":"Archive";
+            String promptTitle = overHandling ? gameOverPrompt :"Archive";
             game.font.setColor(Color.YELLOW);
             GlyphLayout layout = new GlyphLayout(game.font, promptTitle);
             game.font.draw(game.batch, promptTitle, promptX - layout.width/2, promptY);
