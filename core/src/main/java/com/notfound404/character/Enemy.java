@@ -83,6 +83,8 @@ public class Enemy extends Bike {
         // 简化：用公式代替 switch 配置难度参数
         this.moveInterval = Math.max(0, 0.6f - (difficulty * 0.15f)); 
         this.shootCooldown = Math.max(0.2f, 3.5f - (difficulty * 0.8f)); 
+        if(this.difficulty == 4)
+            this.discoMAX = this.discoSlots = 8;
 
         // 根据初始等级同步 Bike 变量
         syncInitialStats();
@@ -212,8 +214,23 @@ public class Enemy extends Bike {
         if (!alignX && !alignY) return; // 不在直线上
 
         // 判断距离限制 (难度4无限距离，其他难度递增)
+        // Beta: Limit BOSS too. Because boss will have no ammo limit.
         int dist = Math.abs(dx + dy);
-        if (this.difficulty < 4 && dist > this.difficulty * 15) return;
+        if (/*this.difficulty < 4 &&*/ dist > this.difficulty * 15) return;
+
+        //Boss 直接射
+        //Boss will shoot at 8 direction.
+        if(difficulty == 4){
+            for(int i = -1; i <= 1 ; i++)
+                for(int j = -1; j <= 1; j++)
+                    if(i == 0 && j == 0)
+                        continue;
+                    else 
+                        this.shootDisco(this.x + i, this.y + j);
+            //射8发补8发
+            //re-load the Magazine
+            this.discoSlots+=8;
+        }
 
         // 判断朝向是否正确 (必须面向玩家才能射击)
         boolean facingPlayer = (alignX && ((dy > 0 && this.dir == Direction.UP) || (dy < 0 && this.dir == Direction.DOWN))) ||
