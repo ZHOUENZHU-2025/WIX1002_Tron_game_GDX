@@ -43,11 +43,18 @@ public class PlayerLevelSystem extends BaseLevelSystem {
     @Override
     protected void applyBaseStatUpgrade() {
         if (player != null) {
-            // 使用 Getter 和 Setter
-            player.setMaxLP((float)(player.getMaxLP() * STAT_MULTIPLIER));
+            
+            // --- 1. 血量升级逻辑 (上限设为 25) ---
+            float newMaxLP = (float)(player.getMaxLP() * STAT_MULTIPLIER);
+            // 使用 Math.min(计算值, 25.0f) 确保血量上限不会超过 25
+            player.setMaxLP(Math.min(newMaxLP, 25.0f)); 
             player.setLP(player.getMaxLP()); // 升级补满血
-            player.setSpeed((float)(player.getSpeed() * STAT_MULTIPLIER));
-        
+
+            // --- 2. 速度升级逻辑 (上限设为 9) ---
+            float newSpeed = (float)(player.getSpeed() * STAT_MULTIPLIER);
+            // 使用 Math.min(计算值, 9.0f) 确保速度不会过快导致无法操作
+            player.setSpeed(Math.min(newSpeed, 9.0f));
+
             // 同步等级和经验
             player.setLevel(currentLevel);
             player.setExp((int)currentXP);

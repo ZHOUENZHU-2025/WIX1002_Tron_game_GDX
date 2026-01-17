@@ -338,8 +338,11 @@ public class GameArena {
     private boolean isBossSpawned = false; // 确保难度4的BOSS只生成一次
     //每帧检查（即生成，已在update中调用）
 
-        // 随机生成敌人的逻辑
-    public void addNewEnemy() {
+
+
+// 随机生成敌人的逻辑
+// 随机生成敌人的逻辑
+public void addNewEnemy() {
     if (playerBike == null || playerBike.isDisposed()) return;
 
     // 1. 获取玩家当前等级
@@ -347,37 +350,62 @@ public class GameArena {
 
     // 2. 检查是否升级（只有等级提升时才触发生成逻辑）
     if (currentLevel > lastTrackedLevel) {
+        
+        //剧情等级点
+        java.util.List<Integer> storyLevels = java.util.Arrays.asList(10, 20, 40, 60, 71, 80);
+        boolean isStoryPoint = storyLevels.contains(currentLevel);
+
+        // 识别场上敌人数量
+        int currentEnemyCount = 0;
+        for (Bike b : bikes) {
+            // 统计场上还没死（没有被 dispose）的敌人
+            if (b instanceof Enemy && !b.isDisposed()) {
+                currentEnemyCount++;
+            }
+        }
+
+        //如果是剧情点，就不拦截上限
+        if (!isStoryPoint && currentEnemyCount >= 3) {
+            // 非剧情点且场上已有3个或更多敌人，则跳过本次生成
+            lastTrackedLevel = currentLevel; 
+            return;
+        }
+
         int enemiesToSpawn = 0;
         int difficultyToSpawn = 1;
 
         // 根据逻辑分支判断生成数量和难度
         if (currentLevel < 10) {
-            // 0-10级：生成2-3个难度1
-            enemiesToSpawn = new Random().nextInt(2) + 2; // [2,3]
+            enemiesToSpawn = new Random().nextInt(1) + 2; 
             difficultyToSpawn = 1;
         } else if (currentLevel < 40) {
-            // 10-40级：生成2-3个难度2
-            enemiesToSpawn = new Random().nextInt(2) + 2;
+            enemiesToSpawn = new Random().nextInt(1) + 2;
             difficultyToSpawn = 2;
         } else if (currentLevel < 70) {
-            // 40-70级：生成2-3个难度3
-            enemiesToSpawn = new Random().nextInt(2) + 2;
+            enemiesToSpawn = new Random().nextInt(1) + 2;
             difficultyToSpawn = 3;
         } else if (currentLevel < 99) {
-            // 70-99级：生成5-7个难度3
-            enemiesToSpawn = new Random().nextInt(3) + 5; // [5,7]
+            enemiesToSpawn = new Random().nextInt(1) + 4; 
             difficultyToSpawn = 3;
         } else if (currentLevel >= 99 && !isBossSpawned) {
-            // 99级：生成1个难度4 (BOSS)
             enemiesToSpawn = 1;
             difficultyToSpawn = 4;
             isBossSpawned = true;
         }
 
+        //剧情点强行生成 3 个
+        int actualToSpawn;
+        if (isStoryPoint) {
+            // 如果到达剧情点，无视上限限制，直接强行生成 3 个
+            actualToSpawn = 3;
+        } else {
+            // 普通等级：根据上限修正数量，场上最多维持 3 个
+            int spaceLeft = 3 - currentEnemyCount;
+            actualToSpawn = Math.min(enemiesToSpawn, spaceLeft);
+        }
         // 3. 执行生成
-        for (int i = 0; i < enemiesToSpawn; i++) {
+        for (int i = 0; i < actualToSpawn; i++) {
             GridPoint2 safePos = getSafePosition();
-            // 注意：Enemy构造函数的difficulty范围是1-4
             addBike(new Enemy(this, safePos.x, safePos.y, difficultyToSpawn));
         }
 

@@ -17,7 +17,9 @@ import com.notfound404.character.Player;
 import com.notfound404.fileReader.ArchiveManager;
 import com.notfound404.fileReader.ImageHandler;
 import com.notfound404.fileReader.MapLoader;
-import com.notfound404.tron.StoryManager.Dialogue;
+import com.notfound404.fileReader.StoryManager;
+import com.notfound404.fileReader.StoryManager.Dialogue;
+
 
 
 /** Game screen where the main gameplay occurs. */
@@ -78,6 +80,7 @@ public class GameScreen implements Screen, InputProcessor {
         this.game = game;
         this.mapName = mapName;
         this.heroType = heroType;
+        
 
         //Initialization Objects declared above
         //接下来初始化上面声明的对象，加载文件就在这里，可以写一些method或者class来增强可读性
@@ -95,6 +98,18 @@ public class GameScreen implements Screen, InputProcessor {
 
         //Initialize map
         loadMap();
+
+        //level loader
+        if (arena.getPlayerBike() != null) {
+        Player player = arena.getPlayerBike();
+        
+        // 灌入等级和存档里的“分数”（在此逻辑下作为经验值处理）
+        player.getLevelSystem().loadFromSave(level, score);
+        
+        // 同步剧情追踪等级，防止重复弹出剧情对话
+        this.lastStoryLevel = level;
+    }
+
         storyManager.trigger("START");
     }
 

@@ -1,11 +1,11 @@
-package com.notfound404.tron;
+package com.notfound404.fileReader;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class StoryManager {
     public static class Dialogue {
-        String name, portrait, text;
+        public String name, portrait, text;
         Dialogue(String n, String p, String t) { name = n; portrait = p; text = t; }
     }
 
