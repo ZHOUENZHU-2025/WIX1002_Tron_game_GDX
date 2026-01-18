@@ -29,6 +29,10 @@ public class StoryManager {
         } else if (type.equals("FINAL")) {
             sequence.add(new Dialogue("HEROINE", "女主3.0.png", "Warning! Powerful energy reading detected. Be careful!"));
             sequence.add(new Dialogue("BOSS", "boss.png", "It seems I have to finish this personally!"));
+        } else if (type.equals("666")) {
+            sequence.add(new Dialogue("HEROINE", "女主3.0.png", "hold up"));
+            sequence.add(new Dialogue("HEROINE", "女主3.0.png", "I've strengthened your weapon for you. Now you can deal with him more effectively"));
+            sequence.add(new Dialogue("BOSS", "boss.png", "Hahaha, even so, you still can't beat me"));
         }
         index = 0; active = true;
     }
