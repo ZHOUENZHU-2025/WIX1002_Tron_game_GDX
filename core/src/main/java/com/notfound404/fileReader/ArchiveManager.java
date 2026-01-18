@@ -2,17 +2,15 @@ package com.notfound404.fileReader;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.io.*;
 import java.util.Scanner;
-
 import com.badlogic.gdx.Gdx;
-//import com.notfound404.arena.GameArena.Direction;
+import com.badlogic.gdx.files.FileHandle;
 
-//This class manages archives from players, which are also entities/lines on the leaderboard.
 public class ArchiveManager {
 
-    final private static String LEADERBOARD_FILE = "Score/leaderboard.txt";
-    final private static String ARCHIVE_FILE = "Score/archive.txt";
+    // 确保路径指向你验证成功的嵌套位置
+    final private static String LEADERBOARD_FILE = "WIX1002_Tron_game_GDX-main/assets/Score/leaderboard.txt";
+    final private static String ARCHIVE_FILE = "WIX1002_Tron_game_GDX-main/assets/Score/archive.txt";
 
     public static class ArchiveEntry implements Comparable<ArchiveEntry>{
         public final String playerID;
@@ -21,31 +19,13 @@ public class ArchiveManager {
         public int score;
         public final String map;
         
-        //For archives, but not Random map.
-        //public int x;
-        //public int y;
-        //public Direction dir;
-        
-        public ArchiveEntry(String ID, String heroType, String map,int level, int score){
+        public ArchiveEntry(String ID, String heroType, String map, int level, int score){
             this.playerID = ID;
             this.heroType = heroType;
             this.map = map;
             this.level = level;
             this.score = score;
         }
-
-        //The other constructor to record the position
-        //But we choose to randomly generate a safe position
-        // public ArchiveEntry(String ID, String heroType, String map,int level, int score,int x, int y, Direction dir){
-        //     this.playerID = ID;
-        //     this.heroType = heroType;
-        //     this.map = map;
-        //     this.level = level;
-        //     this.score = score;
-        //     this.x = x;
-        //     this.y = y;
-        //     this.dir = dir;
-        // }
 
         @Override
         public String toString(){
@@ -58,95 +38,79 @@ public class ArchiveManager {
         }
     }
 
-    // Save Score to leaderboard
-    // 排行榜录入
     public static void saveScoreLB(ArchiveEntry newRecord) {
-        try(PrintWriter lbPW = new PrintWriter(new FileWriter(LEADERBOARD_FILE,true))){
-            lbPW.println(newRecord);
-        }catch(FileNotFoundException e){
-            System.err.println("Score Saving Error: Could not save your score info from internal path.");
-            e.printStackTrace();
-            System.exit(0);
-        }catch(IOException e){
-            System.err.println("Score Saving Error: Output Error.");
-            e.printStackTrace();
-            System.exit(0);
+        try {
+            // 使用 GDX 的 FileHandle 进行写入
+            FileHandle file = Gdx.files.local(LEADERBOARD_FILE);
+            file.writeString(newRecord.toString() + "\n", true);
+        } catch (Exception e) {
+            System.err.println("Score Saving Error: " + e.getMessage());
         }
     }
 
-    // Save Score to archive library
-    // 存档录入
     public static void saveScoreAch(ArchiveEntry newRecord) {
-        try(PrintWriter lbPW = new PrintWriter(new FileWriter(ARCHIVE_FILE,true))){
-            lbPW.println(newRecord);
-        }catch(FileNotFoundException e){
-            System.err.println("Archive Saving Error: Could not save your score info from internal path.");
-            e.printStackTrace();
-            System.exit(0);
-        }catch(IOException e){
-            System.err.println("Archive Saving Error: Output Error.");
-            e.printStackTrace();
-            System.exit(0);
+        try {
+            FileHandle file = Gdx.files.local(ARCHIVE_FILE);
+            file.writeString(newRecord.toString() + "\n", true);
+        } catch (Exception e) {
+            System.err.println("Archive Saving Error: " + e.getMessage());
         }
     }
 
-    // 读取并获取前N名
-    // Rank and get the top 10
     public static ArrayList<ArchiveEntry> getTopScores(int limit) {
         ArrayList<ArchiveEntry> scores = new ArrayList<>();
-        try (Scanner scanner = new Scanner(Gdx.files.internal(LEADERBOARD_FILE).reader())) {
+        FileHandle file = Gdx.files.local(LEADERBOARD_FILE);
+        
+        if (!file.exists()) return scores;
+
+        // 保持你原始的 Scanner 逻辑
+        try (Scanner scanner = new Scanner(file.reader())) {
             while(scanner.hasNextLine()){
-                String[] line = scanner.nextLine().split(",");
+                String lineStr = scanner.nextLine();
+                if(lineStr.trim().isEmpty()) continue;
+                String[] line = lineStr.split(",");
                 try {
-                    scores.add(new ArchiveEntry(line[0], line[1],line[2],Integer.parseInt(line[3]),Integer.parseInt(line[4])));
-                } catch (NumberFormatException e) {
-                    // if there is an error, ignore it and go on.
-                }
+                    scores.add(new ArchiveEntry(line[0], line[1], line[2], Integer.parseInt(line[3].trim()), Integer.parseInt(line[4].trim())));
+                } catch (Exception e) { }
             }
         } catch (Exception e) {
-            System.err.println("Leaderboard Error: Could not read leaderboard info from internal path.");
-            e.printStackTrace();
-            System.exit(0);
+            System.err.println("Leaderboard Error: " + e.getMessage());
         }
 
-        // 排序：等级从高到低
-        // Sort
         Collections.sort(scores);
-
-        // The first N(limit)
         if (scores.size() > limit) {
             return new ArrayList<>(scores.subList(0, limit));
         }
         return scores;
     }
 
-    //存档读取
-    //Read an Archive with a given player ID
     public static ArchiveEntry getArchive(String playerID){
-        if(playerID==null||playerID.length()==0)
-            return null;
+        if(playerID == null || playerID.length() == 0) return null;
+        
         ArrayList<ArchiveEntry> records = new ArrayList<>();
-        try (Scanner scanner = new Scanner(Gdx.files.internal(ARCHIVE_FILE).reader())) {
+        FileHandle file = Gdx.files.local(ARCHIVE_FILE);
+        
+        if (!file.exists()) return null;
+
+        // 保持你原始的 Scanner + ArrayList 结构
+        try (Scanner scanner = new Scanner(file.reader())) {
             while(scanner.hasNextLine()){
-                String[] line = scanner.nextLine().split(",");
+                String lineStr = scanner.nextLine();
+                if(lineStr.trim().isEmpty()) continue;
+                String[] line = lineStr.split(",");
                 try {
-                    records.add(new ArchiveEntry(line[0], line[1],line[2],Integer.parseInt(line[3]),Integer.parseInt(line[4])));
-                } catch (NumberFormatException e) {
-                    // if there is an error, ignore it and go on.
-                    //We will return a null.
-                }
+                    records.add(new ArchiveEntry(line[0], line[1], line[2], Integer.parseInt(line[3].trim()), Integer.parseInt(line[4].trim())));
+                } catch (Exception e) { }
             }
         } catch (Exception e) {
-            System.err.println("Archive Library Error: Could not read archive library info from internal path.");
-            e.printStackTrace();
-            System.exit(0);
+            System.err.println("Archive Library Error: " + e.getMessage());
         }
+
+        // 原始循环比对逻辑
         for(ArchiveEntry data : records){
             if(data.playerID.equals(playerID))
                 return data;
         }
-
         return null;
     }
-
 }
