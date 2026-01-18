@@ -90,7 +90,7 @@ public class GameScreen implements Screen, InputProcessor {
         storyManager.trigger("START");
     }
 
-    //This constructor is for Loaded record: level and score are set at the beginning.
+    //This constructor is for Loaded startmusic: level and score are set at the beginning.
     //这个是给读取存档构建新游戏而准备的构造器
     GameScreen(Main game, String mapName, String heroType, int level, int score) {
         this.game = game;
@@ -104,6 +104,15 @@ public class GameScreen implements Screen, InputProcessor {
         fullLPTexture = new Texture("./image/fullHeart.png");
         halfLPTexture = new Texture("./image/halfHeart.png");
 
+        // 必须初始化音乐播放列表，否则 startMusic 会崩
+        playList = new Array<Music>();
+        playList.add(Gdx.audio.newMusic(Gdx.files.internal("music/Quirky Runner.mp3")));
+        playList.add(Gdx.audio.newMusic(Gdx.files.internal("music/tron-pop-instrumental.mp3")));
+        
+        for(Music m : playList) {
+            m.setLooping(false);
+        }
+        
         arena = new GameArena();
         touchPos = new Vector2();
         painter = new ImageHandler(game.shapeRenderer);
@@ -148,6 +157,7 @@ public class GameScreen implements Screen, InputProcessor {
     //Music play methods
     //===========================================
     private void startMusic(int index){
+        
         currentMusic = playList.get(index);
         currentMusic.play();
     }

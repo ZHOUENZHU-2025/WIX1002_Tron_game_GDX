@@ -69,14 +69,19 @@ public abstract class BaseLevelSystem {
     * 从存档恢复等级数据
     */
     public void loadFromSave(int level, int xpData) {
-    this.currentLevel = level;
-    this.currentXP = (double) xpData;
-    
-    // 重新计算经验上限，保证UI进度条正确
-    this.currentXPCap = BASE_XP_CAP * Math.pow(XP_CAP_MULTIPLIER, currentLevel - 1);
-    
-    // 触发属性同步：让 Bike 的 LP 和 Speed 立即匹配当前等级
-    applyBaseStatUpgrade();
+    // 首先重置系统到1级的初始状态
+    this.currentLevel = 1;
+    this.currentXP = (double) xpData; // 存档里的经验作为当前等级的进度
+    this.currentXPCap = BASE_XP_CAP;
+
+    // 使用循环：只要当前等级还没达到存档等级，就执行一次 levelUp
+    // 这会自动触发子类（PlayerLevelSystem）中所有的属性加成逻辑
+    while (this.currentLevel < level) {
+        this.levelUp(); 
+        // 注意：执行 levelUp 会导致 currentXP 减去 currentXPCap
+        // 为了保证循环结束后 currentXP 依然等于存档里的 xpData，我们在循环内补偿它
+        this.currentXP += this.currentXPCap / XP_CAP_MULTIPLIER;
+    }
 }
 
 
